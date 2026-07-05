@@ -26,9 +26,22 @@ const staffSchema = mongoose.Schema({
         required: true,
         trim: true,
     },
-    role: {
+    position_id: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Position",
+        required: true,
+    },
+    hire_date: {
+        type: Date,
+        default: Date.now,
+    },
+    end_date: {
+        type: Date,
+    },
+    status: {
         type: String,
-        default: "staff",
+        enum: ["active", "inactive"],
+        default: "active",
     },
 },
     {

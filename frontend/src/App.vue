@@ -1,5 +1,6 @@
 <script setup>
 import { Notivue, Notification, NotificationProgress, NotivueSwipe } from 'notivue';
+import Chatbox from './components/Chatbox.vue';
 </script>
 
 <template>
@@ -12,4 +13,5 @@ import { Notivue, Notification, NotificationProgress, NotivueSwipe } from 'notiv
   </Notivue>
 
   <RouterView></RouterView>
+  <Chatbox />
 </template>

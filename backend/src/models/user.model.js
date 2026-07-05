@@ -14,33 +14,42 @@ const userSchema = mongoose.Schema({
     username: {
         type: String,
         unique: true,
+        sparse: true,
         trim: true,
     },
     password: {
         type: String,
-        required: true,
     },
     birthday: {
         type: Date,
-        required: true,
     },
     gender: {
         type: Boolean,
-        required: true,
     },
-    address: {
-        type: String,
-        required: true,
-        trim: true,
-    },
-    phone: {
-        type: String,
-        required: true,
-        trim: true,
-    },
+    addresses: [{
+        label: { type: String, trim: true }, // optional nickname
+        address: { type: String, required: true, trim: true },
+        phone: { type: String, required: true, match: /^0[0-9]{9}$/ },
+        isDefault: { type: Boolean, default: false }
+    }],
     role: {
         type: String,
         default: "user",
+    },
+    oauth_provider: {
+        type: String,
+        enum: ['local', 'google', 'facebook'],
+        default: 'local'
+    },
+    oauth_id: {
+        type: String,
+    },
+    email: {
+        type: String,
+        trim: true,
+    },
+    avatar: {
+        type: String,
     }
 },
     {

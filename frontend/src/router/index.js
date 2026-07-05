@@ -23,6 +23,16 @@ const routes = [
     component: () => import("../views/UserRegister.vue")
   },
   {
+    path: "/auth/callback",
+    name: "auth.callback",
+    component: () => import("../views/AuthCallback.vue")
+  },
+  {
+    path: "/payment/result",
+    name: "payment.result",
+    component: () => import("../views/PaymentResult.vue")
+  },
+  {
     path: "/userprofile",
     name: "userprofile",
     component: () => import("../views/UserProfile.vue"),
@@ -42,9 +52,9 @@ const routes = [
     props: true
   },
   {
-    path: "/books",
-    name: "book.list",
-    component: () => import("../views/BookList.vue"),
+    path: "/products",
+    name: "product.list",
+    component: () => import("../views/ProductList.vue"),
     meta: { requiresAuth: true },
   },
   {
@@ -54,29 +64,29 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
-    path: "/book/add",
-    name: "book.add",
-    component: () => import("../views/BookAdd.vue"),
+    path: "/product/add",
+    name: "product.add",
+    component: () => import("../views/ProductAdd.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: "/book/edit/:id",
-    name: "book.edit",
-    component: () => import("../views/BookEdit.vue"),
+    path: "/product/edit/:id",
+    name: "product.edit",
+    component: () => import("../views/ProductEdit.vue"),
     meta: { requiresAuth: true },
     props: true
   },
   {
-    path: "/borrow/add/:id",
-    name: "borrow.add",
-    component: () => import("../views/BorrowAdd.vue"),
+    path: "/order/add/:id",
+    name: "order.add",
+    component: () => import("../views/OrderAdd.vue"),
     props: true,
     meta: { requiresAuth: true },
   },
   {
-    path: "/borrow/edit/:id",
-    name: "borrow.edit",
-    component: () => (import("../views/BorrowEdit.vue")),
+    path: "/order/edit/:id",
+    name: "order.edit",
+    component: () => (import("../views/OrderEdit.vue")),
     props: true,
     meta: { requiresAuth: true }
   },
@@ -106,34 +116,58 @@ const routes = [
     props: true
   },
   {
-    path: "/publishers",
-    name: "publisher.list",
-    component: () => import("../views/PublisherList.vue"),
+    path: "/brands",
+    name: "brand.list",
+    component: () => import("../views/BrandList.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: "/publisher/add",
-    name: "publisher.add",
-    component: () => import("../views/PublisherAdd.vue"),
+    path: "/brand/add",
+    name: "brand.add",
+    component: () => import("../views/BrandAdd.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: "/publisher/edit/:id",
-    name: "publisher.edit",
-    component: () => import("../views/PublisherEdit.vue"),
+    path: "/brand/edit/:id",
+    name: "brand.edit",
+    component: () => import("../views/BrandEdit.vue"),
     meta: { requiresAuth: true },
     props: true
   },
   {
-    path: "/borrowpending",
-    name: "borrow.pending",
-    component: () => import("../views/BorrowPending.vue"),
+    path: "/orderpending",
+    name: "order.pending",
+    component: () => import("../views/OrderPending.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: "/borrowcheck",
-    name: "borrow.check",
-    component: () => import("../views/BorrowCheck.vue"),
+    path: "/ordercheck",
+    name: "order.check",
+    component: () => import("../views/OrderCheck.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cart/checkout",
+    name: "cart.checkout",
+    component: () => import("../views/CartCheckout.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/diagnosis",
+    name: "diagnosis",
+    component: () => import("../views/Diagnosis.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/dashboard",
+    name: "admin.dashboard",
+    component: () => import("../views/AdminDashboard.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/cart",
+    name: "cart",
+    component: () => import("../views/Cart.vue"),
     meta: { requiresAuth: true },
   },
   {
@@ -141,6 +175,113 @@ const routes = [
     name: "notfound",
     component: () => import("../views/NotFound.vue")
   },
+  {
+    path: "/ingredients",
+    name: "ingredient.list",
+    component: () => import("../views/IngredientList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/ingredient/add",
+    name: "ingredient.add",
+    component: () => import("../views/IngredientAdd.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/ingredient/edit/:id",
+    name: "ingredient.edit",
+    component: () => import("../views/IngredientEdit.vue"),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: "/banners",
+    name: "banner.list",
+    component: () => import("../views/BannerList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/banner/add",
+    name: "banner.add",
+    component: () => import("../views/BannerAdd.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/banner/edit/:id",
+    name: "banner.edit",
+    component: () => import("../views/BannerEdit.vue"),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: "/promotions",
+    name: "promotion.list",
+    component: () => import("../views/PromotionList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/promotion/add",
+    name: "promotion.add",
+    component: () => import("../views/PromotionAdd.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/promotion/edit/:id",
+    name: "promotion.edit",
+    component: () => import("../views/PromotionEdit.vue"),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: "/contacts",
+    name: "contact.list",
+    component: () => import("../views/ContactList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/contact/detail/:id",
+    name: "contact.detail",
+    component: () => import("../views/ContactDetail.vue"),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: "/reviews",
+    name: "review.list",
+    component: () => import("../views/ReviewList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/topics",
+    name: "topic.list",
+    component: () => import("../views/TopicList.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/topic/add",
+    name: "topic.add",
+    component: () => import("../views/TopicAdd.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/topic/edit/:id",
+    name: "topic.edit",
+    component: () => import("../views/TopicEdit.vue"),
+    meta: { requiresAuth: true },
+    props: true
+  },
+  {
+    path: "/settings",
+    name: "system.settings",
+    component: () => import("../views/SystemSettings.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/activity-log",
+    name: "activity.log",
+    component: () => import("../views/ActivityLog.vue"),
+    meta: { requiresAuth: true },
+  }
 ];
 
 const router = createRouter({
