@@ -1,13 +1,18 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
+import { useRouter } from "vue-router";
 import OrderService from "../services/order.service";
+import { push } from "notivue";
 
+const router = useRouter();
 const username = computed(() => localStorage.getItem("username"));
 const role = computed(() => localStorage.getItem("role"));
 
 const borrowService = new OrderService();
 const pendingCount = ref(0);
 let countInterval = null;
+
+const searchQuery = ref("");
 
 const fetchPendingCounts = async () => {
   if (role.value === 'staff') {
@@ -22,9 +27,39 @@ const fetchPendingCounts = async () => {
   }
 };
 
+const handleSearch = () => {
+  if (searchQuery.value.trim()) {
+    router.push({ path: '/products', query: { q: searchQuery.value } });
+  }
+};
+
+const triggerVoiceSearch = () => {
+  push.info("🎙️ Chức năng tìm kiếm giọng nói đang được kích hoạt... Nói để tìm!");
+  // Mock voice search behavior after 2s
+  setTimeout(() => {
+    searchQuery.value = "Kem dưỡng ẩm Centella";
+    handleSearch();
+  }, 2000);
+};
+
+const triggerImageSearch = () => {
+  push.info("📷 Mở máy ảnh để quét da hoặc tìm kiếm sản phẩm qua hình ảnh!");
+  router.push("/diagnosis");
+};
+
+const logout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("username");
+  localStorage.removeItem("role");
+  push.success("Đăng xuất thành công!");
+  router.push("/");
+  setTimeout(() => {
+    window.location.reload();
+  }, 500);
+};
+
 onMounted(() => {
   fetchPendingCounts();
-  // refresh it every 15s to keep notifications alive
   countInterval = setInterval(fetchPendingCounts, 15000); 
 });
 
@@ -39,370 +74,213 @@ const cartCount = computed(() => {
 </script>
 
 <template>
-  <!-- Glassmorphism Sticky Navbar -->
-  <header class="ts-navbar">
-    <div class="ts-navbar-inner">
+  <div class="w-full flex flex-col z-50 relative">
+    <!-- 1. TOP INFORMATION BAR -->
+    <div class="bg-gradient-to-r from-emerald-900 via-emerald-950 to-green-950 text-white text-[11px] md:text-xs py-2 px-4 shadow-sm border-b border-emerald-900/50">
+      <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-4">
+          <a href="tel:18006821" class="flex items-center gap-1 hover:text-emerald-250 transition font-black">
+            <span class="material-symbols-outlined text-sm align-middle">call</span>
+            <span>Hotline:</span>
+            <span class="text-emerald-400">1800.6821</span>
+            <span class="text-slate-400 font-normal">(Miễn phí)</span>
+          </a>
+          <span class="text-slate-700 hidden sm:inline">|</span>
+          <span class="hidden sm:inline text-slate-300 flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm align-middle">smartphone</span>
+            <span>Tải ứng dụng Testskin AI</span>
+          </span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <span class="text-emerald-400 font-bold flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm align-middle">local_shipping</span>
+            <span>Miễn phí vận chuyển đơn từ 150k</span>
+          </span>
+          <span class="text-slate-700 hidden md:inline">|</span>
+          <RouterLink to="/promotions" class="hover:text-emerald-200 transition text-yellow-400 font-bold hidden md:inline flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm align-middle text-yellow-400">local_fire_department</span>
+            <span>Siêu Sale Da Liễu: Giảm tới 50%</span>
+          </RouterLink>
+        </div>
+      </div>
+    </div>
 
-      <!-- LEFT: Logo + Mobile Menu -->
-      <div class="ts-navbar-start">
-        <template v-if="role === 'user' || role === 'staff'">
-          <div class="dropdown">
-            <button tabindex="0" class="ts-menu-toggle lg:hidden" aria-label="Menu">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+    <!-- 2. STICKY HEADER -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-sm transition duration-300">
+      <div class="max-w-7xl mx-auto px-4 h-16 md:h-20 flex items-center justify-between gap-4">
+        
+        <!-- Left: Brand Logo & Mobile toggle -->
+        <div class="flex items-center gap-2 md:gap-4 flex-shrink-0">
+          <div v-if="username" class="dropdown lg:hidden">
+            <button tabindex="0" class="p-2 rounded-xl text-slate-600 hover:bg-slate-50 transition" aria-label="Open mobile menu">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <ul tabindex="0" class="ts-dropdown-menu">
+            
+            <ul tabindex="0" class="absolute left-0 mt-3 w-56 bg-white border border-slate-100 shadow-xl rounded-2xl p-2 z-50 space-y-1">
               <template v-if="role === 'staff'">
-                <li><RouterLink to="/products" class="ts-dropdown-link">Sản phẩm</RouterLink></li>
-                <li>
-                  <RouterLink to="/orderpending" class="ts-dropdown-link flex items-center gap-2">
-                    Đơn đặt hàng
-                    <span v-if="pendingCount > 0" class="ts-badge-pending animate-pulse">{{ pendingCount }}</span>
-                  </RouterLink>
-                </li>
-                <li><RouterLink to="/brands" class="ts-dropdown-link">Thương hiệu</RouterLink></li>
-                <li><RouterLink to="/ingredients" class="ts-dropdown-link">Thành phần</RouterLink></li>
-                <li><RouterLink to="/banners" class="ts-dropdown-link">Quảng cáo</RouterLink></li>
-                <li><RouterLink to="/promotions" class="ts-dropdown-link">Khuyến mãi</RouterLink></li>
-                <li><RouterLink to="/contacts" class="ts-dropdown-link">Liên hệ</RouterLink></li>
-                <li><RouterLink to="/reviews" class="ts-dropdown-link">Bình luận</RouterLink></li>
-                <li><RouterLink to="/topics" class="ts-dropdown-link">Chủ đề</RouterLink></li>
-                <li><RouterLink to="/settings" class="ts-dropdown-link">Cài đặt</RouterLink></li>
-                <li><RouterLink to="/activity-log" class="ts-dropdown-link">Lịch sử HĐ</RouterLink></li>
-                <li><RouterLink to="/users" class="ts-dropdown-link">Người dùng</RouterLink></li>
-                <li><RouterLink to="/staffs" class="ts-dropdown-link">Nhân viên</RouterLink></li>
-                <li><RouterLink to="/staffprofile" class="ts-dropdown-link">Thông tin nhân viên</RouterLink></li>
+                <li><RouterLink to="/dashboard" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Thống kê</RouterLink></li>
+                <li><RouterLink to="/products" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Sản phẩm</RouterLink></li>
+                <li><RouterLink to="/orderpending" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Đơn hàng ({{ pendingCount }})</RouterLink></li>
+                <li><RouterLink to="/users" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Người dùng</RouterLink></li>
+                <li><button @click="logout" class="block w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl">Đăng xuất</button></li>
               </template>
-              <template v-if="role === 'user'">
-                <li><RouterLink to="/products" class="ts-dropdown-link">Sản phẩm</RouterLink></li>
-                <li><RouterLink to="/diagnosis" class="ts-dropdown-link">Chuẩn đoán AI</RouterLink></li>
-                <li><RouterLink to="/ordercheck" class="ts-dropdown-link">Kiểm tra đơn hàng</RouterLink></li>
-                <li><RouterLink to="/userprofile" class="ts-dropdown-link">Thông tin người dùng</RouterLink></li>
+              <template v-else>
+                <li><RouterLink to="/products" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Cửa hàng</RouterLink></li>
+                <li><RouterLink to="/diagnosis" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Chẩn đoán AI</RouterLink></li>
+                <li><RouterLink to="/ordercheck" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Đơn hàng</RouterLink></li>
+                <li><RouterLink to="/userprofile" class="block px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 rounded-xl">Tài khoản</RouterLink></li>
+                <li><button @click="logout" class="block w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 rounded-xl">Đăng xuất</button></li>
               </template>
             </ul>
           </div>
-        </template>
+          
+          <RouterLink to="/" class="flex items-center gap-1">
+            <span class="material-symbols-outlined text-3xl text-emerald-600">stethoscope</span>
+            <span class="brand-wordmark font-black text-xl md:text-2xl tracking-tight">Testskin</span>
+          </RouterLink>
+        </div>
 
-        <RouterLink to="/" class="brand-wordmark">Testskin</RouterLink>
+        <!-- Center: Large Search Bar (voice & image search support) -->
+        <div class="flex-grow max-w-xl hidden md:flex items-center relative">
+          <form @submit.prevent="handleSearch" class="w-full relative flex items-center">
+            <input 
+              v-model="searchQuery"
+              type="text" 
+              placeholder="Tìm kiếm dược mỹ phẩm, loại da, thành phần..."
+              class="w-full bg-slate-50 border border-slate-200 focus:border-emerald-500 focus:bg-white px-5 py-3 pr-24 rounded-full text-sm font-semibold outline-none transition duration-300"
+            />
+            
+            <div class="absolute right-3 flex items-center gap-1.5">
+              <button 
+                type="button" 
+                @click="triggerVoiceSearch"
+                class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-slate-100 transition"
+                title="Tìm kiếm giọng nói"
+              >
+                <span class="material-symbols-outlined text-xl">mic</span>
+              </button>
+              
+              <button 
+                type="button" 
+                @click="triggerImageSearch"
+                class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-emerald-600 hover:bg-slate-100 transition"
+                title="Quét da AI / Tìm bằng ảnh"
+              >
+                <span class="material-symbols-outlined text-xl">photo_camera</span>
+              </button>
+              
+              <button 
+                type="submit"
+                class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-700 transition"
+                title="Tìm kiếm"
+              >
+                <span class="material-symbols-outlined text-lg text-white">search</span>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Right: Actions Menu (Login, Cart, Notifications, Wishlist) -->
+        <div class="flex items-center gap-3 md:gap-5">
+          <!-- Wishlist (Mocked link) -->
+          <RouterLink 
+            to="/userprofile" 
+            class="w-10 h-10 rounded-full flex items-center justify-center border border-slate-100 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 hover:border-emerald-100 transition duration-300 relative"
+            title="Sản phẩm yêu thích"
+          >
+            <span class="material-symbols-outlined text-xl">favorite</span>
+          </RouterLink>
+
+          <!-- Notifications (Mocked Link) -->
+          <RouterLink 
+            to="/userprofile"
+            class="w-10 h-10 rounded-full flex items-center justify-center border border-slate-100 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 hover:border-emerald-100 transition duration-300 relative"
+            title="Thông báo"
+          >
+            <span class="material-symbols-outlined text-xl">notifications</span>
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+              3
+            </span>
+          </RouterLink>
+
+          <!-- Shopping Cart with badge -->
+          <RouterLink 
+            v-if="role !== 'staff'"
+            to="/cart" 
+            class="w-10 h-10 rounded-full flex items-center justify-center border border-slate-100 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50/50 hover:border-emerald-100 transition duration-300 relative"
+            title="Giỏ hàng"
+          >
+            <span class="material-symbols-outlined text-xl">shopping_cart</span>
+            <span v-if="cartCount > 0" class="absolute -top-1 -right-1 bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-[8px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white">
+              {{ cartCount }}
+            </span>
+          </RouterLink>
+
+          <!-- User Profile Dropdown / Login -->
+          <template v-if="!username">
+            <RouterLink 
+              to="/user/login" 
+              class="bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-extrabold px-5 py-2.5 rounded-full text-xs md:text-sm shadow-md hover:shadow-lg transition duration-300"
+            >
+              Đăng Nhập
+            </RouterLink>
+          </template>
+          
+          <template v-else>
+            <div class="dropdown dropdown-end">
+              <button tabindex="0" class="flex items-center gap-1.5 focus:outline-none border border-emerald-100 bg-emerald-50/50 hover:bg-emerald-100 px-3.5 py-1.5 rounded-full transition duration-300 text-slate-800">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-xs font-black">{{ username }}</span>
+                <span class="text-[9px]">▼</span>
+              </button>
+              
+              <ul tabindex="0" class="absolute right-0 mt-3 w-52 bg-white border border-slate-100 shadow-xl rounded-2xl p-2 z-50 space-y-1">
+                <!-- Staff Portal link -->
+                <li v-if="role === 'staff'">
+                  <RouterLink to="/dashboard" class="block px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-xl">
+                    📊 Thống kê Dashboard
+                  </RouterLink>
+                </li>
+                
+                <li>
+                  <RouterLink :to="role === 'staff' ? '/staffprofile' : '/userprofile'" class="block px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-xl">
+                    👤 Trang Cá Nhân
+                  </RouterLink>
+                </li>
+                <li>
+                  <RouterLink to="/ordercheck" class="block px-4 py-2.5 text-xs font-bold text-slate-600 hover:text-emerald-600 hover:bg-slate-50 rounded-xl">
+                    📦 Lịch Sử Đơn Hàng
+                  </RouterLink>
+                </li>
+                <li class="border-t border-slate-50 pt-1.5 mt-1.5">
+                  <button @click="logout" class="block w-full text-left px-4 py-2.5 text-xs font-bold text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl">
+                    👋 Đăng Xuất
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </template>
+        </div>
+
       </div>
-
-      <!-- CENTER: Nav Links (desktop) -->
-      <nav class="ts-navbar-center hidden lg:flex">
-        <template v-if="role === 'staff'">
-          <RouterLink to="/dashboard"    class="ts-nav-link" active-class="ts-nav-link--active">Thống kê</RouterLink>
-          <RouterLink to="/products"     class="ts-nav-link" active-class="ts-nav-link--active">Sản phẩm</RouterLink>
-          <RouterLink to="/orderpending" class="ts-nav-link flex items-center gap-1.5" active-class="ts-nav-link--active">
-            Đơn đặt hàng
-            <span v-if="pendingCount > 0" class="ts-badge-pending animate-pulse">{{ pendingCount }}</span>
-          </RouterLink>
-          <RouterLink to="/brands"       class="ts-nav-link" active-class="ts-nav-link--active">Thương hiệu</RouterLink>
-          <RouterLink to="/ingredients"  class="ts-nav-link" active-class="ts-nav-link--active">Thành phần</RouterLink>
-          <RouterLink to="/banners"      class="ts-nav-link" active-class="ts-nav-link--active">Quảng cáo</RouterLink>
-          <RouterLink to="/promotions"   class="ts-nav-link" active-class="ts-nav-link--active">Khuyến mãi</RouterLink>
-          <RouterLink to="/contacts"     class="ts-nav-link" active-class="ts-nav-link--active">Liên hệ</RouterLink>
-          <RouterLink to="/reviews"      class="ts-nav-link" active-class="ts-nav-link--active">Bình luận</RouterLink>
-          <RouterLink to="/topics"       class="ts-nav-link" active-class="ts-nav-link--active">Chủ đề</RouterLink>
-          <RouterLink to="/settings"     class="ts-nav-link" active-class="ts-nav-link--active">Cài đặt</RouterLink>
-          <RouterLink to="/activity-log" class="ts-nav-link" active-class="ts-nav-link--active">Lịch sử</RouterLink>
-          <RouterLink to="/users"        class="ts-nav-link" active-class="ts-nav-link--active">Người dùng</RouterLink>
-          <RouterLink to="/staffs"       class="ts-nav-link" active-class="ts-nav-link--active">Nhân viên</RouterLink>
-          <RouterLink to="/staffprofile" class="ts-nav-link" active-class="ts-nav-link--active">Thông tin NV</RouterLink>
-        </template>
-        <template v-if="role === 'user'">
-          <RouterLink to="/products"    class="ts-nav-link" active-class="ts-nav-link--active">Sản phẩm</RouterLink>
-          <RouterLink to="/diagnosis"   class="ts-nav-link" active-class="ts-nav-link--active">✨ Chuẩn đoán AI</RouterLink>
-          <RouterLink to="/ordercheck"  class="ts-nav-link" active-class="ts-nav-link--active">Đơn hàng</RouterLink>
-          <RouterLink to="/userprofile" class="ts-nav-link" active-class="ts-nav-link--active">Tài khoản</RouterLink>
-        </template>
-      </nav>
-
-      <!-- RIGHT: Cart + Auth -->
-      <div class="ts-navbar-end">
-        <!-- Cart -->
-        <RouterLink v-if="role === 'user'" to="/cart" class="ts-cart-btn" aria-label="Giỏ hàng">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
-          <span v-if="cartCount > 0" class="ts-cart-badge">{{ cartCount }}</span>
-        </RouterLink>
-
-        <!-- Auth -->
-        <template v-if="!username">
-          <RouterLink to="/user/login" class="ts-btn-login">Đăng Nhập</RouterLink>
-        </template>
-        <template v-else-if="role === 'user'">
-          <RouterLink to="/userprofile" class="ts-user-greeting">
-            <span class="ts-greeting-dot"></span>
-            <span>{{ username }}</span>
-          </RouterLink>
-        </template>
-        <template v-else-if="role === 'staff'">
-          <RouterLink to="/staffprofile" class="ts-user-greeting">
-            <span class="ts-greeting-dot ts-greeting-dot--staff"></span>
-            <span>{{ username }}</span>
-          </RouterLink>
-        </template>
-      </div>
-
-    </div>
-  </header>
+    </header>
+  </div>
 </template>
 
 <style scoped>
-/* =====================
-   TESTSKIN NAVBAR STYLES
-   ===================== */
-
-.ts-navbar {
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  background: rgba(255, 253, 249, 0.90);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(196, 149, 106, 0.20);
-  box-shadow:
-    0 1px 0 rgba(196, 149, 106, 0.10),
-    0 4px 24px rgba(45, 27, 61, 0.07);
-}
-
-.ts-navbar-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-  height: 64px;
-  gap: 1rem;
-}
-
-/* ---- Start ---- */
-.ts-navbar-start {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-/* ---- Center ---- */
-.ts-navbar-center {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  flex: 1;
-  justify-content: center;
-}
-
-/* ---- End ---- */
-.ts-navbar-end {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
-}
-
-/* ---- Nav Link ---- */
-.ts-nav-link {
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: oklch(32% 0.05 310deg);
-  padding: 0.4rem 0.75rem;
-  border-radius: 0.5rem;
-  text-decoration: none;
-  letter-spacing: 0.01em;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.ts-nav-link:hover {
-  color: oklch(62% 0.15 15deg);
-  background: oklch(95% 0.03 15deg);
-}
-
-.ts-nav-link--active {
-  color: oklch(58% 0.16 15deg) !important;
-  font-weight: 700 !important;
-  background: oklch(96% 0.04 15deg);
-}
-
-/* ---- Mobile Toggle ---- */
-.ts-menu-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 0.5rem;
-  border: 1px solid oklch(88% 0.03 30deg);
-  background: transparent;
-  cursor: pointer;
-  color: oklch(35% 0.05 310deg);
-  transition: background 0.2s ease;
-}
-.ts-menu-toggle:hover {
-  background: oklch(94% 0.015 30deg);
-}
-
-/* ---- Dropdown ---- */
 .dropdown {
   position: relative;
 }
-
-.ts-dropdown-menu {
+.dropdown-end .absolute {
+  right: 0;
+}
+.dropdown:focus-within ul {
+  display: block;
+}
+ul {
   display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 200px;
-  background: rgba(255, 253, 249, 0.98);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(196, 149, 106, 0.2);
-  border-radius: 0.875rem;
-  padding: 0.5rem;
-  list-style: none;
-  margin: 0;
-  box-shadow: 0 8px 32px rgba(45, 27, 61, 0.12), 0 2px 8px rgba(196, 149, 106, 0.1);
-  z-index: 200;
-}
-
-.dropdown:focus-within .ts-dropdown-menu {
-  display: block;
-}
-
-.ts-dropdown-link {
-  display: block;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: oklch(32% 0.05 310deg);
-  text-decoration: none;
-  border-radius: 0.5rem;
-  transition: all 0.2s ease;
-}
-
-.ts-dropdown-link:hover {
-  background: oklch(94% 0.03 15deg);
-  color: oklch(58% 0.16 15deg);
-}
-
-/* ---- Pending Badge ---- */
-.ts-badge-pending {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  background: oklch(58% 0.22 25deg);
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 800;
-  border-radius: 9999px;
-  line-height: 1;
-}
-
-/* ---- Cart Button ---- */
-.ts-cart-btn {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 0.625rem;
-  color: oklch(32% 0.05 310deg);
-  background: transparent;
-  border: 1px solid oklch(90% 0.015 30deg);
-  text-decoration: none;
-  transition: all 0.2s ease;
-}
-
-.ts-cart-btn:hover {
-  background: oklch(94% 0.03 15deg);
-  border-color: oklch(80% 0.09 15deg);
-  color: oklch(58% 0.16 15deg);
-}
-
-.ts-cart-badge {
-  position: absolute;
-  top: -6px;
-  right: -6px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 4px;
-  background: linear-gradient(135deg, oklch(62% 0.15 15deg), oklch(68% 0.14 25deg));
-  color: white;
-  font-size: 0.62rem;
-  font-weight: 800;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-}
-
-/* ---- Login Button ---- */
-.ts-btn-login {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.45rem 1.1rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  border-radius: 0.625rem;
-  text-decoration: none;
-  background: linear-gradient(135deg, oklch(62% 0.15 15deg), oklch(68% 0.14 25deg));
-  color: white;
-  box-shadow: 0 2px 12px oklch(65% 0.15 15deg / 0.3);
-  transition: all 0.2s ease;
-}
-
-.ts-btn-login:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px oklch(65% 0.15 15deg / 0.4);
-}
-
-/* ---- User Greeting ---- */
-.ts-user-greeting {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: oklch(30% 0.06 310deg);
-  text-decoration: none;
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  border: 1px solid oklch(88% 0.03 30deg);
-  transition: all 0.2s ease;
-  background: rgba(255, 253, 249, 0.6);
-}
-
-.ts-user-greeting:hover {
-  border-color: oklch(75% 0.09 15deg);
-  background: oklch(97% 0.02 15deg);
-  color: oklch(58% 0.16 15deg);
-}
-
-.ts-greeting-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: oklch(62% 0.15 15deg);
-  flex-shrink: 0;
-}
-
-.ts-greeting-dot--staff {
-  background: oklch(55% 0.14 220deg);
-}
-
-/* ---- Responsive ---- */
-@media (max-width: 1024px) {
-  .ts-navbar-inner {
-    padding: 0 1rem;
-    height: 56px;
-  }
 }
 </style>

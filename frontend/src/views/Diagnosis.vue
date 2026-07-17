@@ -2,10 +2,12 @@
 import Header from "../components/Header.vue";
 import Footer from "../components/Footer.vue";
 import ProductCard from "../components/ProductCard.vue";
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
 import { push } from "notivue";
 import ProductService from "../services/product.service";
 
+const route = useRoute();
 const productService = new ProductService();
 const imageFile = ref(null);
 const previewUrl = ref(null);
@@ -21,6 +23,18 @@ const handleImageUpload = (event) => {
         diagnosisResult.value = null;
         recommendedProducts.value = [];
     }
+};
+
+const dataURLtoFile = (dataurl, filename) => {
+    const arr = dataurl.split(',');
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[arr.length - 1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
 };
 
 const analyzeSkin = async () => {
@@ -67,7 +81,24 @@ const resetDiagnosis = () => {
     previewUrl.value = null;
     diagnosisResult.value = null;
     recommendedProducts.value = [];
+    sessionStorage.removeItem('temp_diagnosis_img');
 };
+
+onMounted(() => {
+    if (route.query.autostart === 'true') {
+        const base64Img = sessionStorage.getItem('temp_diagnosis_img');
+        if (base64Img) {
+            try {
+                const file = dataURLtoFile(base64Img, "temp_diagnosis.jpg");
+                imageFile.value = file;
+                previewUrl.value = URL.createObjectURL(file);
+                analyzeSkin();
+            } catch (err) {
+                console.error("Lỗi parse base64 ảnh:", err);
+            }
+        }
+    }
+});
 </script>
 
 <template>

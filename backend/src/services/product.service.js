@@ -12,6 +12,19 @@ class ProductService {
                 usage: payload.usage,
                 flash_sale_price: payload.flash_sale_price || null,
                 flash_sale_end_time: payload.flash_sale_end_time || null,
+                has_variants: payload.has_variants || false,
+                prescription_required: payload.prescription_required || false,
+                origin_country: payload.origin_country || "Việt Nam",
+                contraindications: payload.contraindications || "",
+                side_effects: payload.side_effects || "",
+                warnings: payload.warnings || "",
+                pregnancy_warning: payload.pregnancy_warning || "",
+                children_warning: payload.children_warning || "",
+                batch_number: payload.batch_number || "BCH-001",
+                skin_type: payload.skin_type || [],
+                pathology: payload.pathology || [],
+                image: payload.image || "",
+                images: payload.images || [],
             };
             Object.keys(bookData).forEach(key => {
                 if (bookData[key] === undefined) {

@@ -1,5 +1,6 @@
 import ReviewService from "../services/review.service.js";
 import ApiError from "../api-error.js";
+import Setting from "../models/setting.model.js";
 
 const reviewService = new ReviewService();
 
@@ -8,7 +9,14 @@ export async function create(req, res, next) {
         return next(new ApiError(400, "User ID and Product ID are required"));
     }
     try {
-        const document = await reviewService.create(req.body);
+        let status = 'approved';
+        const requireApprovalSetting = await Setting.findOne({ khoa_cau_hinh: 'comment_require_approval' });
+        if (requireApprovalSetting && requireApprovalSetting.gia_tri === 'true') {
+            status = 'hidden';
+        }
+
+        const reviewData = { ...req.body, status };
+        const document = await reviewService.create(reviewData);
         return res.status(201).json(document);
     } catch (error) {
         console.log(error);

@@ -35,12 +35,22 @@ const orderSchema = mongoose.Schema({
         enum: ["pending", "confirmed", "shipping", "delivered", "cancelled"],
         default: "pending",
     },
+    payment_method: {
+        type: String,
+        enum: ["cod"],
+        default: "cod",
+    },
     carrier_name: {
         type: String,
     },
     tracking_number: {
         type: String,
     },
+    shipment_history: [{
+        status: { type: String, enum: ["pending","confirmed","shipping","delivered","cancelled"], required: true },
+        updatedAt: { type: Date, default: Date.now },
+        description: { type: String }
+    }],
     subtotal: {
         type: Number,
         default: 0,

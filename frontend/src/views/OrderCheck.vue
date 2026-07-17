@@ -61,7 +61,7 @@ const filteredOrders = computed(() => {
     if (searchText.value) {
         const keyword = searchText.value.toLowerCase();
         result = result.filter(order => {
-            const searchableText = [order.product_id?.title]
+            const searchableText = [order._id, order.product_id?.title]
                 .filter(Boolean)
                 .join(' ')
                 .toLowerCase();
@@ -83,7 +83,7 @@ onMounted(async () => {
         <div class="flex-grow mx-8 sm:mx-16 lg:mx-24 my-8">
             <div class="flex flex-col sm:flex-row gap-2 justify-center mb-8 w-full">
 
-                <div class="tooltip" data-tip="Tên sản phẩm">
+                <div class="tooltip" data-tip="Tìm mã đơn hoặc tên sản phẩm">
                     <InputSearch class="w-full" v-model=" searchText "></InputSearch>
                 </div>
                 <div class="dropdown dropdown-center flex justify-center">

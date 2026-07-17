@@ -50,6 +50,15 @@ const userSchema = mongoose.Schema({
     },
     avatar: {
         type: String,
+    },
+    points: {
+        type: Number,
+        default: 0,
+    },
+    rank: {
+        type: String,
+        enum: ["bronze", "silver", "gold", "diamond"],
+        default: "bronze",
     }
 },
     {

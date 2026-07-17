@@ -1,0 +1,51 @@
+{
+  "info": {
+    "name": "Testskin API Collection",
+    "description": "Postman collection for all Testskin APIs",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        { "name": "Login Staff", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }, "body": { "mode": "raw", "raw": "{\"username\":\"admin\",\"password\":\"password\"}", "options": { "raw": { "language": "json" } } } } },
+        { "name": "Login User", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/auth/login-user", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login-user"] }, "body": { "mode": "raw", "raw": "{\"username\":\"user\",\"password\":\"password\"}", "options": { "raw": { "language": "json" } } } } }
+      ]
+    },
+    {
+      "name": "Staff",
+      "item": [
+        { "name": "Get All Staffs", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/staff", "host": ["{{baseUrl}}"], "path": ["api", "staff"] } } },
+        { "name": "Create Staff", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/staff", "host": ["{{baseUrl}}"], "path": ["api", "staff"] }, "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } } } }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        { "name": "Get All Users", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/user", "host": ["{{baseUrl}}"], "path": ["api", "user"] } } }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        { "name": "Get All Products", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/product", "host": ["{{baseUrl}}"], "path": ["api", "product"] } } }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        { "name": "Get All Orders", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/order", "host": ["{{baseUrl}}"], "path": ["api", "order"] } } }
+      ]
+    },
+    {
+      "name": "Post (Blog)",
+      "item": [
+        { "name": "Get All Posts", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/api/post", "host": ["{{baseUrl}}"], "path": ["api", "post"] } } },
+        { "name": "Create Post", "request": { "method": "POST", "url": { "raw": "{{baseUrl}}/api/post", "host": ["{{baseUrl}}"], "path": ["api", "post"] }, "body": { "mode": "raw", "raw": "{\"title\":\"Test Post\",\"thumbnail\":\"http\",\"summary\":\"Sum\",\"content\":\"Con\",\"status\":\"published\"}", "options": { "raw": { "language": "json" } } } } }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" }
+  ]
+}

@@ -4,11 +4,11 @@
 }
 
 /* ===========================
-   TESTSKIN — Beauty & Skincare
-   Design System v2.0
-   Color Palette: Rose Gold × Pearl White × Deep Plum
-   Typography: Playfair Display + Be Vietnam Pro
-   Rule: 60% (white/cream) | 30% (deep plum/charcoal) | 10% (rose gold)
+   TESTSKIN — Fresh Green Medical
+   Design System v4.0
+   Color Palette: Emerald Green × Teal × Mint White
+   Typography: Roboto + Be Vietnam Pro
+   Rule: 60% (mint white) | 30% (dark green) | 10% (lime/teal accent)
    =========================== */
 
 /* ===========================
@@ -20,42 +20,42 @@
     default: true;
     color-scheme: light;
 
-    /* PRIMARY = Rose Gold accent (10% — CTA buttons, highlights) */
-    --color-primary: oklch(65% 0.15 15deg);          /* #C8736A — warm rose */
-    --color-primary-content: oklch(99% 0.005 15deg); /* near-white text on primary */
+    /* PRIMARY = Emerald Green-600 */
+    --color-primary: #16A34A;
+    --color-primary-content: #ffffff;
 
-    /* SECONDARY = Dusty Pink (soft supporting accent) */
-    --color-secondary: oklch(80% 0.09 15deg);        /* #E8B4AD — blush */
-    --color-secondary-content: oklch(25% 0.06 15deg);
+    /* SECONDARY = Teal-600 */
+    --color-secondary: #0D9488;
+    --color-secondary-content: #ffffff;
 
-    /* ACCENT = Rose Gold metallic */
-    --color-accent: oklch(72% 0.12 45deg);           /* #D4956A — warm golden rose */
-    --color-accent-content: oklch(99% 0.005 45deg);
+    /* ACCENT = Lime-600 */
+    --color-accent: #65A30D;
+    --color-accent-content: #ffffff;
 
-    /* NEUTRAL = Deep Plum/Charcoal (30% — navbar, text, structure) */
-    --color-neutral: oklch(22% 0.05 310deg);         /* #1F1225 — deep plum */
-    --color-neutral-content: oklch(95% 0.01 310deg);
+    /* NEUTRAL = Dark Green-900 */
+    --color-neutral: #14532D;
+    --color-neutral-content: #F0FDF4;
 
-    /* BASE = Pearl White/Cream (60% — background) */
-    --color-base-100: oklch(99% 0.004 60deg);        /* #FFFDF9 — warm white */
-    --color-base-200: oklch(96% 0.008 60deg);        /* #FBF6F0 — pearl cream */
-    --color-base-300: oklch(92% 0.015 40deg);        /* #F3E8DE — soft peach */
-    --color-base-content: oklch(22% 0.05 310deg);    /* deep plum text */
+    /* BASE = Mint White */
+    --color-base-100: #FEFFFE;
+    --color-base-200: #F0FDF4;
+    --color-base-300: #DCFCE7;
+    --color-base-content: #14532D;
 
     /* INFO / SUCCESS / WARNING / ERROR */
-    --color-info: oklch(65% 0.13 220deg);
-    --color-info-content: oklch(98% 0.01 220deg);
-    --color-success: oklch(65% 0.15 152deg);
-    --color-success-content: oklch(98% 0.01 152deg);
-    --color-warning: oklch(75% 0.15 60deg);
-    --color-warning-content: oklch(20% 0.05 60deg);
-    --color-error: oklch(60% 0.20 25deg);
-    --color-error-content: oklch(98% 0.01 25deg);
+    --color-info: #0891B2;
+    --color-info-content: #ffffff;
+    --color-success: #16A34A;
+    --color-success-content: #ffffff;
+    --color-warning: #D97706;
+    --color-warning-content: #ffffff;
+    --color-error: #DC2626;
+    --color-error-content: #ffffff;
 
     /* Radii */
-    --radius-selector: 0.5rem;
-    --radius-field: 0.625rem;
-    --radius-box: 1rem;
+    --radius-selector: 0.75rem;
+    --radius-field: 0.75rem;
+    --radius-box: 1.5rem;
 
     /* Border */
     --border: 1px;
@@ -102,14 +102,18 @@
     --leading-normal: 1.6;
     --leading-relaxed: 1.75;
 
-    /* Brand color tokens (for custom usage) */
-    --color-rose-gold: #C4956A;
-    --color-rose-gold-light: #E8C4A8;
-    --color-plum: #2D1B3D;
-    --color-plum-light: #4A2D5F;
-    --color-blush: #F5D6D0;
-    --color-cream: #FFFDF9;
-    --color-pearl: #FBF6F0;
+    /* Fresh Green brand color tokens */
+    --color-emerald: #16A34A;
+    --color-emerald-light: #4ADE80;
+    --color-emerald-pale: #DCFCE7;
+    --color-teal: #0D9488;
+    --color-teal-light: #2DD4BF;
+    --color-lime: #65A30D;
+    --color-forest-dark: #14532D;
+    --color-green-mid: #166534;
+    --color-mint: #F0FDF4;
+    --color-mint-deep: #DCFCE7;
+    --color-white-green: #FEFFFE;
 }
 
 /* ===========================
@@ -125,12 +129,12 @@
 }
 
 html, body {
-    background-color: oklch(99% 0.004 60deg);
-    color: oklch(22% 0.05 310deg);
+    background-color: #F1F5F9;
+    color: #1E293B;
 }
 
 /* ===========================
-   HEADINGS — Playfair Display
+   HEADINGS
    =========================== */
 
 h1, h2, h3, h4, h5, h6,
@@ -139,7 +143,7 @@ h1, h2, h3, h4, h5, h6,
     font-weight: 700;
     letter-spacing: var(--tracking-snug);
     line-height: var(--leading-tight);
-    color: oklch(22% 0.05 310deg);
+    color: #14532D;
 }
 
 h1 { font-size: var(--text-4xl); line-height: 1.15; }
@@ -149,7 +153,7 @@ h4 { font-size: var(--text-xl); }
 h5 { font-size: var(--text-lg); }
 h6 { font-size: var(--text-base); }
 
-/* Display text — DM Serif Display for hero/decorative */
+/* Display text */
 .font-display {
     font-family: var(--font-display);
     letter-spacing: var(--tracking-snug);
@@ -163,7 +167,7 @@ h6 { font-size: var(--text-base); }
 p, li, label, span, td, th {
     font-family: var(--font-sans);
     line-height: var(--leading-normal);
-    color: oklch(35% 0.04 310deg);
+    color: #166534;
 }
 
 /* Descriptive / caption text */
@@ -180,7 +184,7 @@ p, li, label, span, td, th {
     font-weight: 700;
     letter-spacing: var(--tracking-widest);
     text-transform: uppercase;
-    color: oklch(65% 0.15 15deg);
+    color: var(--color-primary);
 }
 
 /* ===========================
@@ -194,9 +198,9 @@ p, li, label, span, td, th {
     letter-spacing: -0.02em;
     background: linear-gradient(
         135deg,
-        oklch(55% 0.14 15deg) 0%,
-        oklch(65% 0.15 15deg) 40%,
-        oklch(72% 0.12 45deg) 100%
+        #16A34A 0%,
+        #0D9488 60%,
+        #65A30D 100%
     );
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -212,13 +216,13 @@ p, li, label, span, td, th {
     font-family: var(--font-sans);
     font-weight: 500;
     letter-spacing: 0.005em;
-    background: rgba(255, 253, 249, 0.88);
+    background: rgba(254, 255, 254, 0.92);
     backdrop-filter: blur(16px) saturate(160%);
     -webkit-backdrop-filter: blur(16px) saturate(160%);
-    border-bottom: 1px solid rgba(196, 149, 106, 0.18);
+    border-bottom: 1px solid rgba(22, 163, 74, 0.12);
     box-shadow:
-        0 1px 0 rgba(196, 149, 106, 0.12),
-        0 4px 24px rgba(45, 27, 61, 0.06);
+        0 1px 0 rgba(22, 163, 74, 0.08),
+        0 4px 24px rgba(20, 83, 45, 0.05);
     position: sticky;
     top: 0;
     z-index: 50;
@@ -229,22 +233,22 @@ p, li, label, span, td, th {
     font-size: var(--text-sm);
     font-weight: 500;
     letter-spacing: 0.01em;
-    color: oklch(30% 0.06 310deg);
+    color: #166534;
     transition: color 0.2s ease;
 }
 
 .navbar a:hover {
-    color: oklch(65% 0.15 15deg);
+    color: var(--color-primary);
 }
 
 /* Active nav link */
 .navbar .router-link-exact-active {
-    color: oklch(65% 0.15 15deg) !important;
+    color: var(--color-primary) !important;
     font-weight: 700 !important;
 }
 
 /* ===========================
-   BUTTONS — Rose Gold Theme
+   BUTTONS — Eco & Earthy Theme
    =========================== */
 
 .btn {
@@ -260,29 +264,29 @@ p, li, label, span, td, th {
     letter-spacing: 0.02em;
 }
 
-/* Primary Button — Rose Gold CTA */
+/* Primary Button — Emerald Green */
 .btn-primary {
-    background: linear-gradient(135deg, oklch(62% 0.15 15deg), oklch(68% 0.14 25deg));
+    background: linear-gradient(135deg, #16A34A, #0D9488);
     border: none;
     color: white;
-    box-shadow: 0 4px 15px oklch(65% 0.15 15deg / 0.35);
+    box-shadow: 0 4px 15px rgba(22, 163, 74, 0.35);
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, oklch(58% 0.16 15deg), oklch(64% 0.15 25deg));
-    box-shadow: 0 6px 20px oklch(65% 0.15 15deg / 0.45);
+    background: linear-gradient(135deg, #15803D, #0F766E);
+    box-shadow: 0 6px 20px rgba(22, 163, 74, 0.45);
     transform: translateY(-1px);
 }
 
 .btn-neutral {
-    background: oklch(22% 0.05 310deg);
-    color: oklch(96% 0.008 60deg);
+    background: #14532D;
+    color: #F0FDF4;
     border: none;
 }
 
 .btn-neutral:hover {
-    background: oklch(18% 0.06 310deg);
-    box-shadow: 0 4px 15px oklch(22% 0.05 310deg / 0.3);
+    background: #0A3D1E;
+    box-shadow: 0 4px 15px rgba(20, 83, 45, 0.35);
     transform: translateY(-1px);
 }
 
@@ -295,13 +299,13 @@ input, textarea, select {
     font-size: var(--text-sm) !important;
     font-weight: 400;
     letter-spacing: 0.005em;
-    border-color: oklch(85% 0.04 30deg) !important;
+    border-color: #A7F3D0 !important;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 input:focus, textarea:focus, select:focus {
-    border-color: oklch(65% 0.15 15deg) !important;
-    box-shadow: 0 0 0 3px oklch(65% 0.15 15deg / 0.15) !important;
+    border-color: #16A34A !important;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18) !important;
     outline: none !important;
 }
 

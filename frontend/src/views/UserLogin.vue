@@ -1,19 +1,24 @@
 <script setup>
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import UserService from '../services/user.service';
 import { push } from 'notivue';
-import { useForm, useField } from "vee-validate";
 import { loginSchema } from '../validations/login.validation';
 
 const userService = new UserService();
 const router = useRouter();
-const { handleSubmit } = useForm({ validationSchema: loginSchema });
 
-const { value: username, errorMessage: usernameError } = useField("username");
-const { value: password, errorMessage: passwordError } = useField("password");
+const username = ref("");
+const password = ref("");
+const usernameError = ref("");
+const passwordError = ref("");
 
-const handleUserLogin = handleSubmit(async () => {
+const handleUserLogin = async () => {
   try {
+    await loginSchema.validate({ username: username.value, password: password.value }, { abortEarly: false });
+    usernameError.value = "";
+    passwordError.value = "";
+
     const response = await userService.login(username.value, password.value);
     if (response?.data?.token) {
       localStorage.setItem("authenticateToken", response.data.token);
@@ -26,13 +31,18 @@ const handleUserLogin = handleSubmit(async () => {
       router.push("/");
     }
   } catch (error) {
+    if (error.inner) {
+      usernameError.value = error.inner.find(e => e.path === "username")?.message || "";
+      passwordError.value = error.inner.find(e => e.path === "password")?.message || "";
+      return;
+    }
     console.error(error);
     if (error.response?.status === 400) push.error("Vui lòng điền đầy đủ thông tin");
     else if (error.response?.status === 401) push.error("Mật khẩu không khớp");
     else if (error.response?.status === 404) push.error("Tên đăng nhập không tồn tại");
     else push.error("Đăng nhập thất bại, vui lòng thử lại");
   }
-});
+};
 
 const loginWithGoogle = () => { window.location.href = "http://localhost:3000/api/auth/google"; };
 const loginWithFacebook = () => { window.location.href = "http://localhost:3000/api/auth/facebook"; };
@@ -89,10 +99,12 @@ const loginWithFacebook = () => { window.location.href = "http://localhost:3000/
             <input
               v-model="username"
               id="username"
+              name="username"
               type="text"
               class="sp-field__input"
               :class="{ 'sp-field__input--error': usernameError }"
               placeholder="Tên đăng nhập của bạn"
+              autocomplete="off"
             />
             <span v-if="usernameError" class="sp-field__error">{{ usernameError }}</span>
           </div>
@@ -102,10 +114,12 @@ const loginWithFacebook = () => { window.location.href = "http://localhost:3000/
             <input
               v-model="password"
               id="password"
+              name="password"
               type="password"
               class="sp-field__input"
               :class="{ 'sp-field__input--error': passwordError }"
               placeholder="Mật khẩu của bạn"
+              autocomplete="new-password"
             />
             <span v-if="passwordError" class="sp-field__error">{{ passwordError }}</span>
           </div>

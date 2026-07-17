@@ -49,6 +49,46 @@ const productSchema = mongoose.Schema({
         type: Date,
         default: null,
     },
+    has_variants: {
+        type: Boolean,
+        default: false,
+    },
+    prescription_required: {
+        type: Boolean,
+        default: false,
+    },
+    origin_country: {
+        type: String,
+        default: "Việt Nam",
+    },
+    contraindications: {
+        type: String,
+        default: "",
+    },
+    side_effects: {
+        type: String,
+        default: "",
+    },
+    warnings: {
+        type: String,
+        default: "",
+    },
+    pregnancy_warning: {
+        type: String,
+        default: "",
+    },
+    children_warning: {
+        type: String,
+        default: "",
+    },
+    batch_number: {
+        type: String,
+        default: "BCH-001",
+    },
+    images: {
+        type: [String],
+        default: [],
+    },
 },
     {
         timestamps: true,

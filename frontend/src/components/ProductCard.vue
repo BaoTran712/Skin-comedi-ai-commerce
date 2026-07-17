@@ -97,7 +97,7 @@ const handleAddToCart = () => {
 <template>
   <div class="flex flex-col h-full bg-white shadow-md rounded-2xl overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group border border-gray-100">
     <!-- Image Section -->
-    <div class="h-56 w-full relative overflow-hidden bg-gray-100">
+    <RouterLink :to="{ name: 'product.detail', params: { id: product._id } }" class="h-56 w-full relative overflow-hidden bg-gray-100 block">
       <div v-if=" loading " class="skeleton h-full w-full"></div>
       <img :alt="product.title" @load="loading = false" @error="handleImgError" :class=" { 'opacity-0': loading, 'scale-110 group-hover:scale-100': !loading } "
         :src=" productImage "
@@ -113,21 +113,23 @@ const handleAddToCart = () => {
       <div v-if="product.quantity <= 0" class="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
         <span class="bg-white/90 text-gray-800 px-4 py-2 rounded-full font-bold shadow-lg">Hết hàng</span>
       </div>
-    </div>
+    </RouterLink>
 
     <!-- Content Section -->
-    <div class="p-5 flex flex-col flex-grow">
+    <div class="p-5 flex flex-col flex-grow text-left">
       <div class="flex-grow">
         <div class="flex items-center justify-between mb-1">
           <span class="text-eyebrow">{{ product.brand_id?.name || 'Testskin' }}</span>
           <span v-if="product.expiry_date" class="text-[10px] text-gray-400">HSD: {{ product.expiry_date }}</span>
         </div>
-        <h3 class="product-title mb-2 line-clamp-2 group-hover:text-primary transition-colors">{{ product.title }}</h3>
+        <RouterLink :to="{ name: 'product.detail', params: { id: product._id } }" class="block">
+          <h3 class="product-title mb-2 line-clamp-2 hover:text-primary transition-colors text-slate-800">{{ product.title }}</h3>
+        </RouterLink>
         
         <!-- Tags -->
         <div class="flex flex-wrap gap-1 mb-4">
-          <span v-for="type in product.skin_type" :key="type" class="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-medium rounded-md border border-blue-100 capitalize">{{ type }}</span>
-          <span v-for="path in product.pathology" :key="path" class="px-2 py-0.5 bg-rose-50 text-rose-600 text-[10px] font-medium rounded-md border border-rose-100 capitalize">{{ path }}</span>
+          <span v-for="type in product.skin_type" :key="type" class="px-2 py-0.5 bg-emerald-50 text-emerald-600 text-[10px] font-medium rounded-md border border-emerald-100 capitalize">{{ type }}</span>
+          <span v-for="path in product.pathology" :key="path" class="px-2 py-0.5 bg-teal-50 text-teal-600 text-[10px] font-medium rounded-md border border-teal-100 capitalize">{{ path }}</span>
         </div>
         
         <p class="text-sm text-gray-500 line-clamp-2 mb-4 leading-relaxed">{{ product.usage }}</p>

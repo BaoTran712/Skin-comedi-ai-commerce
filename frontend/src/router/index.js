@@ -58,6 +58,12 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: "/product/:id",
+    name: "product.detail",
+    component: () => import("../views/ProductDetail.vue"),
+    props: true
+  },
+  {
     path: "/users",
     name: "user.list",
     component: () => import("../views/UserList.vue"),
@@ -196,9 +202,18 @@ const routes = [
   },
   {
     path: "/banners",
-    name: "banner.list",
+    name: "banners",
     component: () => import("../views/BannerList.vue"),
-    meta: { requiresAuth: true },
+  },
+  {
+    path: "/posts",
+    name: "posts",
+    component: () => import("../views/PostList.vue"),
+  },
+  {
+    path: "/blog",
+    name: "blog",
+    component: () => import("../views/Blog.vue"),
   },
   {
     path: "/banner/add",
@@ -215,9 +230,23 @@ const routes = [
   },
   {
     path: "/promotions",
-    name: "promotion.list",
+    name: "promotions",
     component: () => import("../views/PromotionList.vue"),
-    meta: { requiresAuth: true },
+  },
+  {
+    path: "/suppliers",
+    name: "suppliers",
+    component: () => import("../views/SupplierList.vue"),
+  },
+  {
+    path: "/imports",
+    name: "imports",
+    component: () => import("../views/ImportReceiptList.vue"),
+  },
+  {
+    path: "/imports/add",
+    name: "imports.add",
+    component: () => import("../views/ImportReceiptAdd.vue"),
   },
   {
     path: "/promotion/add",
@@ -274,6 +303,12 @@ const routes = [
     path: "/settings",
     name: "system.settings",
     component: () => import("../views/SystemSettings.vue"),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: "/comment-settings",
+    name: "comment.settings",
+    component: () => import("../views/CommentSettings.vue"),
     meta: { requiresAuth: true },
   },
   {

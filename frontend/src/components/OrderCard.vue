@@ -163,7 +163,7 @@ const sortedHistory = computed(() => {
     <div class="flex flex-col shadow-lg rounded-xl overflow-hidden bg-white border border-gray-100 hover:shadow-xl transition-shadow duration-300">
         <div class="relative h-48 w-full group">
             <div v-if="loading" class="skeleton absolute inset-0 w-full h-full"></div>
-            <img :src="`https://picsum.photos/seed/${props.order.product_id?.title}/800`" 
+            <img :src="props.order.variant_id?.image || props.order.product_id?.image || `https://picsum.photos/seed/${props.order.product_id?.title}/800`" 
                  @load="loading = false"
                  class="w-full h-full object-cover"
                  :class="{'opacity-0': loading}" />
@@ -176,6 +176,9 @@ const sortedHistory = computed(() => {
 
         <div class="p-4 space-y-3">
             <h3 class="font-bold text-lg text-gray-800 truncate">{{ props.order.product_id?.title || 'Sản phẩm' }}</h3>
+            <div v-if="props.order.variant_id" class="text-xs text-gray-500 font-semibold bg-gray-100 rounded px-2 py-0.5 inline-block my-1">
+                Phân loại: <span v-for="attr in props.order.variant_id.attributes" :key="attr.name">{{ attr.name }}: {{ attr.value }}</span>
+            </div>
             
             <div class="space-y-2 text-sm border-t pt-3">
                 <div class="flex justify-between">
@@ -189,6 +192,10 @@ const sortedHistory = computed(() => {
                 <div class="flex justify-between">
                     <span class="text-gray-500">SĐT:</span>
                     <span class="font-medium text-gray-700">{{ props.order.phone_number }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Tổng tiền:</span>
+                    <span class="font-bold text-primary">{{ formatPrice(props.order.total_amount || 0) }} (x{{ props.order.quantity || 1 }})</span>
                 </div>
                 <div v-if="props.order.tracking_number" class="flex justify-between items-center p-2 bg-blue-50 rounded-lg border border-blue-100">
                     <span class="text-blue-700 font-bold text-xs">Mã vận chuyển:</span>

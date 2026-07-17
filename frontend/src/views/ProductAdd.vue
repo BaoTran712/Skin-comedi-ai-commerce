@@ -4,6 +4,7 @@ import Footer from '../components/Footer.vue';
 
 import BrandService from '../services/brand.service';
 import ProductService from "../services/product.service";
+import VariantService from "../services/variant.service";
 import { useRouter } from 'vue-router';
 import { ref, computed, onMounted } from 'vue';
 import { push } from 'notivue';
@@ -12,8 +13,18 @@ import { productSchema } from '../validations/product.validation';
 
 const productService = new ProductService();
 const brandService = new BrandService();
+const variantService = new VariantService();
 const router = useRouter();
 const role = computed(() => localStorage.getItem("role"));
+
+const hasVariants = ref(false);
+const variants = ref([]);
+const addVariantRow = () => {
+  variants.value.push({ attrName: '', attrValue: '', price: 0, quantity: 0, image: '' });
+};
+const removeVariantRow = (index) => {
+  variants.value.splice(index, 1);
+};
 
 const { handleSubmit } = useForm({
   validationSchema: productSchema,
@@ -45,6 +56,61 @@ const { value: flash_sale_price, errorMessage: flashSalePriceError } = useField(
 const { value: flash_sale_end_time, errorMessage: flashSaleEndTimeError } = useField("flash_sale_end_time");
 
 const brands = ref([]);
+const imagesList = ref([]);
+const newImageUrl = ref("");
+const isDragging = ref(false);
+
+const addImageUrl = () => {
+  if (newImageUrl.value.trim()) {
+    imagesList.value.push(newImageUrl.value.trim());
+    newImageUrl.value = "";
+  }
+};
+
+const handleFileSelect = (e) => {
+  const files = Array.from(e.target.files);
+  files.forEach(file => {
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      imagesList.value.push(ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  });
+};
+
+const handleDrop = (e) => {
+  isDragging.value = false;
+  const files = Array.from(e.dataTransfer.files);
+  files.forEach(file => {
+    if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        imagesList.value.push(ev.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+};
+
+const removeImage = (index) => {
+  imagesList.value.splice(index, 1);
+};
+
+const makeCover = (index) => {
+  if (index > 0) {
+    const item = imagesList.value.splice(index, 1)[0];
+    imagesList.value.unshift(item);
+  }
+};
+
+const moveImage = (index, direction) => {
+  const targetIndex = index + direction;
+  if (targetIndex >= 0 && targetIndex < imagesList.value.length) {
+    const temp = imagesList.value[index];
+    imagesList.value[index] = imagesList.value[targetIndex];
+    imagesList.value[targetIndex] = temp;
+  }
+};
 
 const fetchBrands = async () => {
   try {
@@ -76,7 +142,25 @@ const handleCreateProduct = handleSubmit(async (values) => {
       delete payload.flash_sale_price;
       delete payload.flash_sale_end_time;
     }
-    await productService.createProduct(payload);
+    
+    payload.has_variants = hasVariants.value;
+    payload.image = imagesList.value[0] || "";
+    payload.images = imagesList.value;
+
+    const newProduct = await productService.createProduct(payload);
+
+    if (hasVariants.value && variants.value.length > 0) {
+      const variantPromises = variants.value.map(v => {
+        return variantService.createVariant({
+          product_id: newProduct._id || newProduct.id,
+          attributes: [{ name: v.attrName, value: v.attrValue }],
+          price: v.price,
+          quantity: v.quantity,
+          image: v.image
+        });
+      });
+      await Promise.all(variantPromises);
+    }
 
     push.success("Thêm sản phẩm thành công");
     router.push("/products");
@@ -148,10 +232,54 @@ onMounted(async () => {
             <span class="text-xs text-red-600 mt-1">{{ quantityError }}</span>
           </div>
 
-          <div class="md:col-span-2">
-            <label class="label font-semibold text-gray-700" for="image">Link hình ảnh sản phẩm</label>
-            <input v-model=" image " type="text" class="input input-bordered w-full" id="image" placeholder="https://example.com/image.jpg" />
-            <span class="text-xs text-red-600 mt-1">{{ imageError }}</span>
+          <!-- Advanced Image Manager -->
+          <div class="md:col-span-2 p-6 border border-slate-200 rounded-2xl bg-slate-50 space-y-4 text-left">
+            <label class="label font-bold text-slate-700 text-sm">🖼️ Quản lý hình ảnh sản phẩm</label>
+            
+            <div class="join w-full">
+              <input v-model="newImageUrl" type="text" placeholder="Dán URL hình ảnh vào đây..." class="input input-bordered join-item w-full input-sm" />
+              <button type="button" @click="addImageUrl" class="btn btn-sm btn-primary join-item">Thêm URL</button>
+            </div>
+
+            <div 
+              @dragover.prevent="isDragging = true" 
+              @dragleave.prevent="isDragging = false"
+              @drop.prevent="handleDrop"
+              :class="isDragging ? 'border-primary bg-primary/5' : 'border-slate-300 bg-white'"
+              class="border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer hover:border-primary transition"
+              @click="$refs.fileInput.click()"
+            >
+              <input type="file" ref="fileInput" class="hidden" multiple accept="image/*" @change="handleFileSelect" />
+              <span class="text-2xl">📥</span>
+              <p class="text-xs text-slate-500 mt-2 font-semibold">Kéo thả hình ảnh vào đây hoặc nhấp để tải lên</p>
+              <p class="text-[10px] text-slate-400 mt-1">Hỗ trợ JPG, PNG, GIF</p>
+            </div>
+
+            <div v-if="imagesList.length > 0" class="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-2">
+              <div 
+                v-for="(imgUrl, idx) in imagesList" 
+                :key="idx" 
+                class="group relative rounded-xl overflow-hidden border border-slate-200 aspect-square bg-slate-100 shadow-sm"
+              >
+                <img :src="imgUrl" class="w-full h-full object-cover" />
+                
+                <span v-if="idx === 0" class="absolute top-1.5 left-1.5 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
+                  ẢNH BÌA
+                </span>
+
+                <div class="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition flex flex-col justify-between p-2">
+                  <button type="button" @click="removeImage(idx)" class="btn btn-xs btn-circle btn-error self-end text-white font-bold">✕</button>
+                  <div class="flex justify-between items-center gap-1">
+                    <div class="flex gap-1">
+                      <button type="button" :disabled="idx === 0" @click="moveImage(idx, -1)" class="btn btn-xs btn-square bg-white text-slate-800 border-none disabled:opacity-40">◀</button>
+                      <button type="button" :disabled="idx === imagesList.length - 1" @click="moveImage(idx, 1)" class="btn btn-xs btn-square bg-white text-slate-800 border-none disabled:opacity-40">▶</button>
+                    </div>
+                    <button v-if="idx !== 0" type="button" @click="makeCover(idx)" class="btn btn-xs btn-success text-white font-extrabold text-[9px]">Đặt Bìa</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p v-else class="text-xs text-slate-400 text-center py-2 font-medium">Chưa có hình ảnh nào được tải lên cho sản phẩm này.</p>
           </div>
 
           <div>
@@ -187,6 +315,51 @@ onMounted(async () => {
                 <input v-model=" flash_sale_end_time " type="datetime-local" class="input input-bordered w-full" id="flash_sale_end_time" />
                 <span class="text-xs text-red-600 mt-1">{{ flashSaleEndTimeError }}</span>
               </div>
+            </div>
+          </div>
+
+          <!-- Variants Config -->
+          <div class="md:col-span-2 mt-4 p-6 border border-emerald-500/20 rounded-2xl bg-emerald-50/30 flex flex-col gap-4">
+            <label class="label cursor-pointer justify-start gap-4 p-0">
+              <input type="checkbox" v-model="hasVariants" class="toggle toggle-success" />
+              <span class="label-text font-bold text-emerald-700 text-lg flex items-center gap-2">
+                📦 Sản phẩm có nhiều phân loại (Thuộc tính nâng cao)
+              </span>
+            </label>
+
+            <div v-if="hasVariants" class="space-y-4 animate-in fade-in duration-300">
+              <p class="text-sm text-emerald-600">Thêm các biến thể (ví dụ: Màu Đỏ, Size M) với giá và số lượng riêng biệt.</p>
+              
+              <div class="overflow-x-auto">
+                <table class="table w-full">
+                  <thead>
+                    <tr class="bg-emerald-100/50">
+                      <th>Tên Thuộc Tính</th>
+                      <th>Giá Trị</th>
+                      <th>Giá Bán</th>
+                      <th>Tồn Kho</th>
+                      <th>Link Hình Ảnh (tuỳ chọn)</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(v, idx) in variants" :key="idx">
+                      <td><input v-model="v.attrName" placeholder="VD: Màu sắc" class="input input-sm input-bordered w-full" /></td>
+                      <td><input v-model="v.attrValue" placeholder="VD: Đỏ" class="input input-sm input-bordered w-full" /></td>
+                      <td><input v-model="v.price" type="number" placeholder="Giá" class="input input-sm input-bordered w-24" /></td>
+                      <td><input v-model="v.quantity" type="number" placeholder="Kho" class="input input-sm input-bordered w-20" /></td>
+                      <td><input v-model="v.image" placeholder="URL hình ảnh" class="input input-sm input-bordered w-full" /></td>
+                      <td>
+                        <button type="button" @click="removeVariantRow(idx)" class="btn btn-sm btn-ghost text-red-500">✕</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <button type="button" @click="addVariantRow" class="btn btn-sm btn-outline btn-success">
+                + Thêm phân loại
+              </button>
             </div>
           </div>
 

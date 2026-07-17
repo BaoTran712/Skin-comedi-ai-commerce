@@ -43,6 +43,11 @@ const staffSchema = mongoose.Schema({
         enum: ["active", "inactive"],
         default: "active",
     },
+    rank: {
+        type: String,
+        enum: ["intern", "junior", "senior", "manager"],
+        default: "junior",
+    },
 },
     {
         timestamps: true,

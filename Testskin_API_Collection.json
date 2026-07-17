@@ -1,0 +1,1717 @@
+{
+    "info": {
+        "name": "Testskin API Postman Collection",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Staff",
+            "item": [
+                {
+                    "name": "Get all Staff",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/staff",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "staff"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Staff",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/staff",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "staff"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Staff by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/staff/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Staff",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/staff/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Staff",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/staff/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "item": [
+                {
+                    "name": "Get all User",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/user",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "user"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/user",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "user"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get User by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/user/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update User",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/user/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete User",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/user/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Brand",
+            "item": [
+                {
+                    "name": "Get all Brand",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/brand",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "brand"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Brand",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/brand",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "brand"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Brand by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/brand/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "brand",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Brand",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/brand/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "brand",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Brand",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/brand/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "brand",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Product",
+            "item": [
+                {
+                    "name": "Get all Product",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/product",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "product"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Product",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/product",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "product"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Product by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/product/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "product",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Product",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/product/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "product",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Product",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/product/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "product",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Order",
+            "item": [
+                {
+                    "name": "Get all Order",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/order",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "order"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Order",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/order",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "order"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Order by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/order/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "order",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Order",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/order/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "order",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Order",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/order/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "order",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Review",
+            "item": [
+                {
+                    "name": "Get all Review",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/review",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "review"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Review",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/review",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "review"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Review by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/review/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "review",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Review",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/review/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "review",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Review",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/review/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "review",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Diagnosis",
+            "item": [
+                {
+                    "name": "Get all Diagnosis",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/diagnosis",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "diagnosis"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Diagnosis",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/diagnosis",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "diagnosis"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Diagnosis by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/diagnosis/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "diagnosis",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Diagnosis",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/diagnosis/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "diagnosis",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Diagnosis",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/diagnosis/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "diagnosis",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Chat",
+            "item": [
+                {
+                    "name": "Get all Chat",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Chat",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "chat"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Chat by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "chat",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Chat",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "chat",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Chat",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/chat/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "chat",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "POST /login",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "http://localhost:3000/api/auth/login",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        }
+                    }
+                },
+                {
+                    "name": "POST /register",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "http://localhost:3000/api/auth/register",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        }
+                    }
+                },
+                {
+                    "name": "POST /admin/login",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "http://localhost:3000/api/auth/admin/login",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "admin",
+                                "login"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        }
+                    }
+                },
+                {
+                    "name": "GET /google",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/auth/google",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "google"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /facebook",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/auth/facebook",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "facebook"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Payment",
+            "item": [
+                {
+                    "name": "POST /create_payment_url",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "http://localhost:3000/api/payment/create_payment_url",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "payment",
+                                "create_payment_url"
+                            ]
+                        },
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        }
+                    }
+                },
+                {
+                    "name": "GET /vnpay_return",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/payment/vnpay_return",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "payment",
+                                "vnpay_return"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /vnpay_ipn",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/payment/vnpay_ipn",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "payment",
+                                "vnpay_ipn"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Post",
+            "item": [
+                {
+                    "name": "Get all Post",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/post",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "post"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Post",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/post",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "post"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Post by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/post/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "post",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Post",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/post/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "post",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Post",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/post/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "post",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Supplier",
+            "item": [
+                {
+                    "name": "Get all Supplier",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/supplier",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "supplier"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Supplier",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/supplier",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "supplier"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Supplier by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/supplier/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "supplier",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Supplier",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/supplier/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "supplier",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Supplier",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/supplier/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "supplier",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Import Receipt",
+            "item": [
+                {
+                    "name": "Get all Import Receipt",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/import-receipt",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "import-receipt"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Import Receipt",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/import-receipt",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "import-receipt"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Import Receipt by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/import-receipt/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "import-receipt",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Import Receipt",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/import-receipt/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "import-receipt",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Import Receipt",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/import-receipt/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "import-receipt",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Promotion",
+            "item": [
+                {
+                    "name": "Get all Promotion",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/promotion",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "promotion"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Promotion",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/promotion",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "promotion"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Promotion by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/promotion/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "promotion",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Promotion",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/promotion/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "promotion",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Promotion",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/promotion/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "promotion",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Setting",
+            "item": [
+                {
+                    "name": "Get all Setting",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/setting",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "setting"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Create Setting",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/setting",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "setting"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Get Setting by ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/setting/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "setting",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Update Setting",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{}"
+                        },
+                        "url": {
+                            "raw": "http://localhost:3000/api/setting/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "setting",
+                                "123"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Delete Setting",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "http://localhost:3000/api/setting/123",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "setting",
+                                "123"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "GET /stats/dashboard",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/stats/dashboard",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "stats",
+                                "dashboard"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /stats/revenue",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/stats/revenue",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "stats",
+                                "revenue"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /stats/orders",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/stats/orders",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "stats",
+                                "orders"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin Revenue",
+            "item": [
+                {
+                    "name": "GET /daily",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/revenue/daily",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "revenue",
+                                "daily"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /monthly",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/revenue/monthly",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "revenue",
+                                "monthly"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "GET /yearly",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "http://localhost:3000/api/admin/revenue/yearly",
+                            "host": [
+                                "http://localhost:3000"
+                            ],
+                            "path": [
+                                "api",
+                                "admin",
+                                "revenue",
+                                "yearly"
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ]
+}

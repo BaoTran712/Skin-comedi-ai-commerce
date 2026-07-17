@@ -10,6 +10,7 @@ class StaffService {
             role: payload.role || "staff",
             address: payload.address || "",
             phone: payload.phone || "",
+            position_id: payload.position_id || undefined,
         };
         Object.keys(staffData).forEach(key => {
             if (staffData[key] === undefined || staffData[key] === null || staffData[key] === "") {

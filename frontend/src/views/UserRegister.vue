@@ -42,7 +42,6 @@ const handleUserRegister = handleSubmit(async (values) => {
       push.error("Đăng ký thất bại, vui lòng thử lại");
     }
   }
-  }
 });
 
 const loginWithGoogle = () => {

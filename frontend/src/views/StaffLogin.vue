@@ -1,19 +1,25 @@
 <script setup>
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import StaffService from '../services/staff.service';
 import { push } from 'notivue';
-import { useForm, useField } from "vee-validate";
 import { loginSchema } from '../validations/login.validation';
 
 const staffService = new StaffService();
 const router = useRouter();
-const { handleSubmit } = useForm({ validationSchema: loginSchema });
 
-const { value: username, errorMessage: usernameError } = useField("username");
-const { value: password, errorMessage: passwordError } = useField("password");
+const username = ref("");
+const password = ref("");
+const usernameError = ref("");
+const passwordError = ref("");
 
-const handleStaffLogin = handleSubmit(async () => {
+const handleStaffLogin = async () => {
   try {
+    // Validate manually to avoid vee-validate autofill blocking bugs
+    await loginSchema.validate({ username: username.value, password: password.value }, { abortEarly: false });
+    usernameError.value = "";
+    passwordError.value = "";
+
     const response = await staffService.login(username.value, password.value);
     if (response?.data?.token) {
       localStorage.setItem("authenticateToken", response.data.token);
@@ -26,13 +32,19 @@ const handleStaffLogin = handleSubmit(async () => {
       router.push("/products");
     }
   } catch (error) {
+    if (error.inner) {
+      // Yup validation error
+      usernameError.value = error.inner.find(e => e.path === "username")?.message || "";
+      passwordError.value = error.inner.find(e => e.path === "password")?.message || "";
+      return;
+    }
     console.error(error);
     if (error.response?.status === 400) push.error("Vui lòng điền đầy đủ thông tin");
     else if (error.response?.status === 404) push.error("Tên đăng nhập không tồn tại");
     else if (error.response?.status === 401) push.error("Mật khẩu không khớp");
     else push.error("Đăng nhập thất bại, vui lòng thử lại");
   }
-});
+};
 </script>
 
 <template>
@@ -52,11 +64,11 @@ const handleStaffLogin = handleSubmit(async () => {
       <div class="sp-card">
         <!-- Logo -->
         <div class="sp-logo">
-          <svg viewBox="0 0 40 40" fill="none" class="sp-logo__icon">
-            <circle cx="20" cy="20" r="20" fill="white" fill-opacity="0.1"/>
-            <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="20" cy="22" r="3" fill="white"/>
-            <path d="M14 28c1.5-1.5 3.4-2 6-2s4.5.5 6 2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" class="sp-logo__icon">
+            <circle cx="20" cy="20" r="20" fill="#0f172a" fill-opacity="0.1"/>
+            <path d="M12 20c0-4.4 3.6-8 8-8s8 3.6 8 8" stroke="#0f172a" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="20" cy="22" r="3" fill="#0f172a"/>
+            <path d="M14 28c1.5-1.5 3.4-2 6-2s4.5.5 6 2" stroke="#0f172a" stroke-width="2" stroke-linecap="round"/>
           </svg>
           <span class="sp-logo__text">Testskin</span>
         </div>
@@ -74,11 +86,12 @@ const handleStaffLogin = handleSubmit(async () => {
             <input
               v-model="username"
               id="username"
+              name="username"
               type="text"
               class="sp-field__input"
               :class="{ 'sp-field__input--error': usernameError }"
               placeholder="Tên đăng nhập"
-              autocomplete="username"
+              autocomplete="off"
             />
             <span v-if="usernameError" class="sp-field__error">{{ usernameError }}</span>
           </div>
@@ -88,11 +101,12 @@ const handleStaffLogin = handleSubmit(async () => {
             <input
               v-model="password"
               id="password"
+              name="password"
               type="password"
               class="sp-field__input"
               :class="{ 'sp-field__input--error': passwordError }"
               placeholder="Mật khẩu"
-              autocomplete="current-password"
+              autocomplete="new-password"
             />
             <span v-if="passwordError" class="sp-field__error">{{ passwordError }}</span>
           </div>

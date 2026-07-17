@@ -27,14 +27,17 @@ class OrderService {
                     path: "brand_id",
                     model: "Brand"
                 }
-            });
+            })
+            .populate("variant_id");
         
         if (detail) {
             order.product_id = detail.product_id;
+            order.variant_id = detail.variant_id;
             order.quantity = detail.quantity;
             order.price_at_purchase = detail.price_at_purchase;
         } else {
             order.product_id = null;
+            order.variant_id = null;
             order.quantity = 0;
             order.price_at_purchase = 0;
         }
@@ -70,8 +73,19 @@ class OrderService {
                 throw new Error("Product not found");
             }
 
-            const price = product.flash_sale_price || product.price;
-            const subtotal = price;
+            let price = product.flash_sale_price || product.price;
+            let variant = null;
+            
+            if (payload.variant_id) {
+                const Variant = (await import('../models/variant.model.js')).default;
+                variant = await Variant.findById(payload.variant_id);
+                if (variant) {
+                    price = variant.price;
+                }
+            }
+
+            const qty = payload.quantity || 1;
+            const subtotal = price * qty;
             const discount_amount = 0;
             const total_amount = subtotal - discount_amount;
 
@@ -102,7 +116,8 @@ class OrderService {
             const orderDetail = new OrderDetail({
                 order_id: savedOrder._id,
                 product_id: product._id,
-                quantity: 1,
+                variant_id: variant ? variant._id : undefined,
+                quantity: qty,
                 price_at_purchase: price,
             });
             await orderDetail.save();

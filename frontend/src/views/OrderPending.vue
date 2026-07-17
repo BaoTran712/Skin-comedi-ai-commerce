@@ -1,8 +1,6 @@
 <script setup>
-import Header from "../components/Header.vue";
-import Footer from "../components/Footer.vue";
+import AdminLayout from "../components/AdminLayout.vue";
 import InputSearch from "../components/InputSearch.vue";
-import OrderCard from "../components/OrderCard.vue";
 
 import { useRouter } from "vue-router";
 import { ref, computed, onMounted } from 'vue';
@@ -65,6 +63,7 @@ const filteredOrders = computed(() => {
         const keyword = searchText.value.toLowerCase();
         result = result.filter(order => {
             const searchableText = [
+                order._id,
                 order.product_id?.title, 
                 order.user_id?.first_name, 
                 order.user_id?.last_name, 
@@ -80,6 +79,25 @@ const filteredOrders = computed(() => {
     }
 
     return result;
+});
+
+const delayedOrders = computed(() => {
+    const now = new Date();
+    return orders.value.filter(order => {
+        if (order.status === 'pending') {
+            const orderDate = new Date(order.order_date || order.createdAt);
+            const diffTime = Math.abs(now - orderDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 1;
+        }
+        if (order.status === 'shipping') {
+            const updatedDate = new Date(order.updatedAt);
+            const diffTime = Math.abs(now - updatedDate);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays > 3;
+        }
+        return false;
+    });
 });
 
 const handleApproveAllPending = async () => {
@@ -111,6 +129,51 @@ const handleApproveAllPending = async () => {
     }
 };
 
+const statusText = (status) => {
+    const map = { pending: 'Chờ xác nhận', confirmed: 'Đã xác nhận', shipping: 'Đang giao', delivered: 'Đã giao', cancelled: 'Đã hủy' };
+    return map[status] || 'Không xác định';
+};
+
+const statusClass = (status) => {
+    const map = { pending: 'badge-warning text-white', confirmed: 'badge-info text-white', shipping: 'badge-primary text-white', delivered: 'badge-success text-white', cancelled: 'badge-error text-white' };
+    return map[status] || 'badge-ghost';
+};
+
+const paymentStatusText = (status) => status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán';
+const paymentStatusClass = (status) => status === 'paid' ? 'badge-success text-white' : 'badge-warning text-white';
+
+const formatPrice = (price) => {
+    if (!price) return '0 đ';
+    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
+
+const updateOrderStatus = async (order, event) => {
+    const newStatus = event.target.value;
+    try {
+        let payload = { status: newStatus, staff_id: staff_id.value };
+        if (newStatus === 'shipping') {
+            const tracking = prompt("Nhập mã vận chuyển (nếu có):", order.tracking_number || "");
+            if (tracking !== null) {
+                payload.tracking_number = tracking;
+            } else {
+                event.target.value = order.status;
+                return;
+            }
+        }
+        await orderService.updateOrder(order._id, payload);
+        
+        if (newStatus === 'confirmed' && order.product_id?.quantity > 0) {
+            await productService.updateProduct(order.product_id?._id, { quantity: order.product_id.quantity - 1 });
+        }
+        push.success("Cập nhật trạng thái thành công");
+        fetchOrders();
+    } catch (error) {
+        console.error(error);
+        push.error("Lỗi khi cập nhật trạng thái");
+        fetchOrders();
+    }
+};
+
 onMounted(async () => {
     if (role.value !== "staff") {
         router.push("/");
@@ -120,15 +183,13 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="flex flex-col min-h-screen overflow-hidden bg-gray-50">
-        <Header></Header>
-        <div class="flex-grow mx-8 sm:mx-16 lg:mx-24 my-8">
-            <div class="flex flex-col gap-6">
+    <AdminLayout>
+        <div class="flex flex-col gap-6">
                 <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h1 class="text-2xl font-bold text-gray-800">Quản lý đơn hàng</h1>
                     
                     <div class="flex flex-wrap justify-center gap-3 w-full sm:w-auto">
-                        <div class="tooltip" data-tip="Tìm theo sản phẩm, khách hàng, địa chỉ, SĐT">
+                        <div class="tooltip" data-tip="Tìm mã đơn hàng, sản phẩm, khách, SĐT...">
                             <InputSearch class="w-64" v-model=" searchText "></InputSearch>
                         </div>
                         
@@ -152,11 +213,59 @@ onMounted(async () => {
                     </div>
                 </div>
 
+                <div v-if="delayedOrders.length > 0" class="alert alert-error shadow-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <div>
+                        <h3 class="font-bold">Cảnh báo: Có {{ delayedOrders.length }} đơn hàng chậm trễ!</h3>
+                        <div class="text-xs">Vui lòng kiểm tra và xử lý gấp các đơn hàng đang chờ quá 1 ngày hoặc đang giao quá 3 ngày.</div>
+                    </div>
+                    <button class="btn btn-sm" @click="handleFilterStatus('pending')">Xem đơn chờ</button>
+                    <button class="btn btn-sm" @click="handleFilterStatus('shipping')">Xem đơn đang giao</button>
+                </div>
+
                 <template v-if=" filteredOrders.length > 0 ">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6">
-                        <OrderCard v-for=" order in filteredOrders " :key=" order._id " :order=" order "
-                            @fetchOrders=" fetchOrders ">
-                        </OrderCard>
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+                        <table class="table table-sm table-zebra w-full text-xs">
+                            <thead class="bg-gray-50 text-gray-600 text-xs">
+                                <tr>
+                                    <th>Mã Đơn</th>
+                                    <th>Khách Hàng</th>
+                                    <th>Sản Phẩm</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Thanh Toán</th>
+                                    <th>Trạng Thái</th>
+                                    <th class="w-32">Cập Nhật</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="order in filteredOrders" :key="order._id" class="hover:bg-gray-50">
+                                    <td class="font-mono text-[11px] font-bold text-gray-500">{{ order._id.slice(-8).toUpperCase() }}</td>
+                                    <td>
+                                        <div class="font-bold">{{ order.user_id?.first_name }} {{ order.user_id?.last_name }}</div>
+                                        <div class="text-[10px] text-gray-500">{{ order.phone_number }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="font-medium truncate max-w-[200px]" :title="order.product_id?.title">{{ order.product_id?.title }}</div>
+                                    </td>
+                                    <td class="font-bold text-emerald-600">{{ formatPrice(order.total_amount) }}</td>
+                                    <td>
+                                        <div class="badge badge-sm text-xs font-bold" :class="paymentStatusClass(order.payment_status)">{{ paymentStatusText(order.payment_status) }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="badge badge-sm font-bold text-xs" :class="statusClass(order.status)">{{ statusText(order.status) }}</div>
+                                    </td>
+                                    <td>
+                                        <select :value="order.status" @change="updateOrderStatus(order, $event)" class="select select-bordered select-sm w-full max-w-xs text-xs font-bold bg-white">
+                                            <option value="pending">Chờ xác nhận</option>
+                                            <option value="confirmed">Đã xác nhận</option>
+                                            <option value="shipping">Đang giao</option>
+                                            <option value="delivered">Đã giao</option>
+                                            <option value="cancelled">Đã hủy</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </template>
 
@@ -165,8 +274,6 @@ onMounted(async () => {
                         <p class="text-xl font-medium text-gray-400">Không tìm thấy đơn hàng nào phù hợp</p>
                     </div>
                 </template>
-            </div>
         </div>
-        <Footer></Footer>
-    </div>
+    </AdminLayout>
 </template>
