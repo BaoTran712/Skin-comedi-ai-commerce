@@ -36,7 +36,7 @@ const deletePost = async (id) => {
     <AdminLayout>
         <div class="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6">
             <h1 class="text-xl font-bold text-gray-800">Quản lý bài viết</h1>
-            <button class="btn btn-primary btn-sm" @click="push.info('Chức năng thêm bài viết đang phát triển')">+ Thêm bài mới</button>
+            <RouterLink to="/post/add" class="btn btn-primary btn-sm">+ Thêm bài mới</RouterLink>
         </div>
 
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
@@ -65,7 +65,7 @@ const deletePost = async (id) => {
                             </span>
                         </td>
                         <td class="text-right">
-                            <button class="btn btn-ghost btn-xs text-blue-500">Sửa</button>
+                            <RouterLink :to="`/post/edit/${post._id}`" class="btn btn-ghost btn-xs text-blue-500">Sửa</RouterLink>
                             <button @click="deletePost(post._id)" class="btn btn-ghost btn-xs text-red-500">Xóa</button>
                         </td>
                     </tr>

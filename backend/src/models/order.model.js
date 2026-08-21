@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 
 const orderSchema = mongoose.Schema({
+    order_code: {
+        type: String,
+        unique: true,
+        sparse: true,
+    },
     user_id: {
         type: mongoose.Schema.ObjectId,
         ref: "User",
@@ -23,8 +28,14 @@ const orderSchema = mongoose.Schema({
         type: Date,
     },
     shipping_address: {
-        type: String,
-        required: true,
+        recipientName: { type: String, trim: true },
+        provinceCode: { type: String, required: true },
+        provinceName: { type: String, required: true },
+        districtCode: { type: String, required: true },
+        districtName: { type: String, required: true },
+        wardCode: { type: String, required: true },
+        wardName: { type: String, required: true },
+        addressDetail: { type: String, required: true, trim: true },
     },
     phone_number: {
         type: String,
@@ -32,13 +43,36 @@ const orderSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["pending", "confirmed", "shipping", "delivered", "cancelled"],
+        enum: ["pending", "confirmed", "shipping", "delivered", "completed", "cancelled", "return_requested", "returning", "returned", "refunded"],
         default: "pending",
+    },
+    return_reason: {
+        type: String,
+        trim: true,
+    },
+    return_note: {
+        type: String,
+        trim: true,
+    },
+    return_date: {
+        type: Date,
+    },
+    refund_amount: {
+        type: Number,
     },
     payment_method: {
         type: String,
-        enum: ["cod"],
-        default: "cod",
+        enum: ["COD", "VNPAY", "BANK_TRANSFER", "VIETQR", "MOMO"],
+        default: "COD",
+    },
+    shipping_method: {
+        type: String,
+        enum: ["standard", "express"],
+        default: "standard",
+    },
+    shipping_fee: {
+        type: Number,
+        default: 0,
     },
     carrier_name: {
         type: String,
@@ -47,7 +81,7 @@ const orderSchema = mongoose.Schema({
         type: String,
     },
     shipment_history: [{
-        status: { type: String, enum: ["pending","confirmed","shipping","delivered","cancelled"], required: true },
+        status: { type: String, enum: ["pending","confirmed","shipping","delivered","completed","cancelled", "return_requested", "returning", "returned", "refunded"], required: true },
         updatedAt: { type: Date, default: Date.now },
         description: { type: String }
     }],
@@ -60,10 +94,38 @@ const orderSchema = mongoose.Schema({
         type: Number,
         default: 0,
     },
+    discount_voucher: {
+        type: Number,
+        default: 0,
+    },
+    discount_points: {
+        type: Number,
+        default: 0,
+    },
+    points_used: {
+        type: Number,
+        default: 0,
+    },
     total_amount: {
         type: Number,
         default: 0,
         required: true,
+    },
+    note: {
+        type: String,
+        default: "",
+    },
+    points_earned: {
+        type: Number,
+        default: 0,
+    },
+    points_credited: {
+        type: Boolean,
+        default: false,
+    },
+    coin_toss_eligible: {
+        type: Boolean,
+        default: true,
     },
 },
     {

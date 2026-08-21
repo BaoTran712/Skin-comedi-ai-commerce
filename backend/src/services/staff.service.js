@@ -1,33 +1,58 @@
 import Staff from "../models/staff.model.js";
+import User from "../models/user.model.js";
 import bcrypt from "bcrypt";
 
 class StaffService {
     async create(payload) {
+        const staffName = payload.name || `${payload.first_name || ''} ${payload.last_name || ''}`.trim() || payload.username;
         const staffData = {
-            name: payload.name || "",
+            name: staffName,
             username: payload.username,
             password: payload.password,
-            role: payload.role || "staff",
+            role: "STAFF",
             address: payload.address || "",
             phone: payload.phone || "",
-            position_id: payload.position_id || undefined,
+            status: "ACTIVE"
         };
-        Object.keys(staffData).forEach(key => {
-            if (staffData[key] === undefined || staffData[key] === null || staffData[key] === "") {
-                delete staffData[key];
-            }
-        });
 
         if (staffData.password) {
             staffData.password = await bcrypt.hash(staffData.password, 12);
         }
 
         const staff = new Staff(staffData);
-        return await staff.save();
+        const savedStaff = await staff.save();
+
+        // Sync corresponding record in User collection for universal login
+        try {
+            const existingUser = await User.findOne({ username: payload.username });
+            if (!existingUser) {
+                const userDoc = new User({
+                    first_name: payload.first_name || staffName.split(' ')[0] || "Nhân",
+                    last_name: payload.last_name || staffName.split(' ').slice(1).join(' ') || "Viên",
+                    username: payload.username,
+                    email: payload.username,
+                    password: staffData.password,
+                    phone: payload.phone || undefined,
+                    role: "STAFF",
+                    isVerified: true,
+                    status: "ACTIVE"
+                });
+                await userDoc.save();
+            } else {
+                existingUser.role = "STAFF";
+                existingUser.password = staffData.password;
+                existingUser.isVerified = true;
+                await existingUser.save();
+            }
+        } catch (syncErr) {
+            console.error("Sync staff to User collection error:", syncErr);
+        }
+
+        return savedStaff;
     }
 
     async find(filter) {
-        return await Staff.find(filter);
+        return await Staff.find(filter).sort({ createdAt: -1 });
     }
 
     async findById(id) {
@@ -56,6 +81,10 @@ class StaffService {
             delete payload.password;
         }
 
+        if (payload.role) {
+            payload.role = payload.role.toUpperCase();
+        }
+
         Object.keys(payload).forEach(key => {
             if (payload[key] === undefined || payload[key] === "" || payload[key] === null) {
                 delete payload[key];
@@ -66,10 +95,29 @@ class StaffService {
             id, { $set: payload }, { new: true, runValidators: true }
         );
 
+        // Also update corresponding User record
+        try {
+            if (existingStaff.username) {
+                const userDoc = await User.findOne({ username: existingStaff.username });
+                if (userDoc) {
+                    if (payload.role) userDoc.role = payload.role;
+                    if (payload.password) userDoc.password = payload.password;
+                    if (payload.status) userDoc.status = payload.status;
+                    await userDoc.save();
+                }
+            }
+        } catch (syncErr) {
+            console.error("Sync update staff error:", syncErr);
+        }
+
         return result;
     }
 
     async delete(id) {
+        const staff = await Staff.findById(id);
+        if (staff) {
+            await User.deleteOne({ username: staff.username });
+        }
         const result = await Staff.findByIdAndDelete(id);
         return result;
     }

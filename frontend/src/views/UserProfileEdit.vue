@@ -11,7 +11,7 @@ import { useForm, useField } from "vee-validate";
 const userService = new UserService();
 const router = useRouter();
 const route = useRoute();
-const role = computed(() => localStorage.getItem("role"));
+const role = computed(() => (localStorage.getItem("role") || "").toUpperCase());
 const user_id = route.params.id;
 
 const { handleSubmit, resetForm } = useForm({ validationSchema: userSchema });
@@ -20,7 +20,7 @@ const handleUserProfileEdit = handleSubmit(async (values) => {
   try {
     await userService.updateUser(user_id, values);
     push.success("Cập nhật thông tin người dùng thành công");
-    router.push(role.value === "staff" ? "/users" : "/userprofile");
+    router.push(role.value === "STAFF" || role.value === "ADMIN" ? "/users" : "/userprofile");
   } catch (error) {
     console.log(error);
     if (error.response?.status === 409) push.error("Tên đăng nhập đã tồn tại");
@@ -76,7 +76,7 @@ onMounted(async () => {
       <div class="pe-container">
         <!-- Header bar -->
         <div class="pe-header">
-          <RouterLink :to="role === 'staff' ? '/users' : '/userprofile'" class="pe-back-btn">
+          <RouterLink :to="role === 'STAFF' || role === 'ADMIN' ? '/users' : '/userprofile'" class="pe-back-btn">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
             </svg>
@@ -137,11 +137,7 @@ onMounted(async () => {
               <span class="pe-error">{{ genderError }}</span>
             </div>
 
-            <div class="pe-field pe-field--full">
-              <label class="pe-label">Địa chỉ</label>
-              <input v-model="address" type="text" class="pe-input" placeholder="123 Đường ABC, Quận 1, TP.HCM" />
-              <span class="pe-error">{{ addressError }}</span>
-            </div>
+
 
             <div class="pe-field">
               <label class="pe-label">Số điện thoại</label>
@@ -164,7 +160,7 @@ onMounted(async () => {
 
           <!-- Action buttons -->
           <div class="pe-actions">
-            <template v-if="role === 'staff'">
+            <template v-if="role === 'STAFF' || role === 'ADMIN'">
               <button type="submit" class="pe-btn pe-btn--primary">Lưu thay đổi</button>
               <button type="button" @click="handleUserProfileDelete" class="pe-btn pe-btn--danger">Xóa người dùng</button>
             </template>

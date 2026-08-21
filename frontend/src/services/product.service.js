@@ -19,6 +19,20 @@ class ProductService {
     }
   }
 
+  async uploadImage(id, formData) {
+    try {
+      const response = await this.api.post(`/${id}/upload`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Error upload product image:", error.response || error);
+      throw error;
+    }
+  }
+
   async getProduct(id) {
     return (await this.api.get(`/${id}`)).data;
   }

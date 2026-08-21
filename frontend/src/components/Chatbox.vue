@@ -22,6 +22,24 @@ const sendMessage = async () => {
     if (!message.value.trim() || isLoading.value) return;
 
     const userMessage = message.value;
+    
+    // Prepare history
+    const history = messages.value.slice(1).map(m => ({
+        role: m.isUser ? 'user' : 'model',
+        text: m.text
+    }));
+
+    // Retrieve optional AI diagnosis context from localStorage
+    const savedDiagnosis = localStorage.getItem('latest_ai_diagnosis');
+    let aiContext = null;
+    if (savedDiagnosis) {
+        try {
+            aiContext = JSON.parse(savedDiagnosis);
+        } catch (e) {
+            console.error("Failed to parse saved diagnosis:", e);
+        }
+    }
+
     messages.value.push({ text: userMessage, isUser: true });
     message.value = '';
     isLoading.value = true;
@@ -29,7 +47,7 @@ const sendMessage = async () => {
     scrollToBottom();
 
     try {
-        const response = await chatService.sendMessage(userMessage);
+        const response = await chatService.sendMessage(userMessage, history, aiContext);
         messages.value.push({ 
             text: response.text, 
             isUser: false, 

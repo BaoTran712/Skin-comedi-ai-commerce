@@ -1,12 +1,19 @@
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import UserService from '../services/user.service';
 import { push } from 'notivue';
 import { loginSchema } from '../validations/login.validation';
 
 const userService = new UserService();
 const router = useRouter();
+const route = useRoute();
+
+onMounted(() => {
+  if (route.query.error) {
+    push.error(decodeURIComponent(route.query.error));
+  }
+});
 
 const username = ref("");
 const password = ref("");
@@ -21,14 +28,25 @@ const handleUserLogin = async () => {
 
     const response = await userService.login(username.value, password.value);
     if (response?.data?.token) {
+      const user = response.data.user;
+      let userRole = (user.role || "CUSTOMER").toUpperCase();
+      if (userRole === "USER") userRole = "CUSTOMER";
+      if (userRole === "EMPLOYEE") userRole = "STAFF";
+
       localStorage.setItem("authenticateToken", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-      localStorage.setItem("username", response.data.user.username);
-      localStorage.setItem("id", response.data.user.id);
-      localStorage.setItem("role", "user");
-      localStorage.setItem("avatar", response.data.user.avatar || "");
+      localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("username", user.username);
+      localStorage.setItem("id", user.id);
+      localStorage.setItem("role", userRole);
+      localStorage.setItem("avatar", user.avatar || "");
       push.success("Đăng nhập thành công");
-      router.push("/");
+
+      if (userRole === "ADMIN" || userRole === "STAFF") {
+        router.push("/dashboard");
+      } else {
+        const redirectPath = route.query.redirect || "/";
+        router.push(redirectPath);
+      }
     }
   } catch (error) {
     if (error.inner) {
@@ -129,7 +147,7 @@ const loginWithFacebook = () => { window.location.href = "http://localhost:3000/
 
         <!-- Footer links -->
         <div class="sp-footer">
-          <p>Chưa có tài khoản? <RouterLink to="/user/register" class="sp-link">Đăng ký Testskin</RouterLink></p>
+          <p>Chưa có tài khoản? <RouterLink :to="{ path: '/user/register', query: { redirect: route.query.redirect } }" class="sp-link">Đăng ký Testskin</RouterLink></p>
           <p style="margin-top:0.5rem">Bạn là nhân viên? <RouterLink to="/staff/login" class="sp-link">Cổng nhân viên</RouterLink></p>
         </div>
       </div>

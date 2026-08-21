@@ -18,7 +18,7 @@ const goToStaffProfileEdit = (id) => {
 };
 
 onMounted(async () => {
-  if (role.value !== "staff") {
+  if ((role.value || "").toLowerCase() !== "staff") {
     router.push("/");
     return;
   }

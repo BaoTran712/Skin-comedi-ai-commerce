@@ -17,6 +17,10 @@ class AddressService {
     return (await this.api.put(`/${id}`, data)).data;
   }
 
+  async setDefaultAddress(id) {
+    return (await this.api.put(`/${id}/default`)).data;
+  }
+
   async deleteAddress(id) {
     return (await this.api.delete(`/${id}`)).data;
   }

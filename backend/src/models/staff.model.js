@@ -18,7 +18,6 @@ const staffSchema = mongoose.Schema({
     },
     address: {
         type: String,
-        required: true,
         trim: true,
     },
     phone: {
@@ -29,7 +28,6 @@ const staffSchema = mongoose.Schema({
     position_id: {
         type: mongoose.Schema.ObjectId,
         ref: "Position",
-        required: true,
     },
     hire_date: {
         type: Date,
@@ -40,13 +38,18 @@ const staffSchema = mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ["active", "inactive"],
-        default: "active",
+        enum: ["ACTIVE", "INACTIVE", "LOCKED"],
+        default: "ACTIVE",
     },
     rank: {
         type: String,
         enum: ["intern", "junior", "senior", "manager"],
         default: "junior",
+    },
+    role: {
+        type: String,
+        enum: ["ADMIN", "STAFF", "CUSTOMER"],
+        default: "STAFF",
     },
 },
     {

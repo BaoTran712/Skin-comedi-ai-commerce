@@ -3,654 +3,1498 @@ import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
 
 import { useAuth } from '../composables/useAuth';
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onUnmounted } from "vue";
 import UserService from '../services/user.service';
 import OrderService from '../services/order.service';
-import ReviewService from '../services/review.service';
+import AddressService from '../services/address.service';
+import LocationService from '../services/location.service';
+import ApiClient from '../services/api.service';
 import { useRouter } from 'vue-router';
+import { push } from 'notivue';
 
 const router = useRouter();
 const { logOut } = useAuth();
 const userService = new UserService();
-const borrowService = new OrderService();
-const reviewService = new ReviewService();
+const orderService = new OrderService();
+const addressService = new AddressService();
+const api = ApiClient();
 
 const user = ref({});
-const borrowings = ref([]);
-const userReviews = ref([]);
+const orders = ref([]);
+const addresses = ref([]);
+const bankAccounts = ref([]);
+const pointsInfo = ref({ points: 0, rank: 'bronze', totalEarned: 0, totalSpent: 0 });
+const pointHistory = ref([]);
+const pointFilter = ref('ALL'); // ALL, EARN, SPEND
+
 const user_id = computed(() => localStorage.getItem("id"));
 const loading = ref(true);
-const activeTab = ref('info');
+const activeTab = ref('info'); // info, address, bank, points, orders, security
 
-const goToUserProfileEdit = async (id) => {
-  router.push({ name: "userprofile.edit", params: { id } });
-};
+// Edit User State
+const isEditingUser = ref(false);
+const editFirstName = ref('');
+const editLastName = ref('');
+const editEmail = ref('');
+const editPhone = ref('');
+const editBirthday = ref('');
+const editGender = ref(true);
 
-const fetchData = async () => {
-  loading.value = true;
-  try {
-    const user_data = await userService.getUser(user_id.value);
-    user.value = user_data;
-    
-    // Fetch Borrowings
-    borrowings.value = await borrowService.getAllOrders({ user_id: user_id.value });
-    
-    // Fetch Reviews
-    userReviews.value = await reviewService.getReviewsByUserId(user_id.value);
-  } catch (error) {
-    console.log(error);
-  } finally {
-    loading.value = false;
+// Password Change State
+const currentPassword = ref('');
+const newPassword = ref('');
+const confirmPassword = ref('');
+const isChangingPassword = ref(false);
+
+// Avatar Change State
+const avatarInputRef = ref(null);
+const isUploadingAvatar = ref(false);
+
+const triggerAvatarUpload = () => {
+  if (avatarInputRef.value) {
+    avatarInputRef.value.click();
   }
 };
 
-const handleRenew = async (borrowId) => {
+const onAvatarFileSelected = async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) {
+    push.error("Kích thước ảnh tối đa là 5MB!");
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async (event) => {
+    const base64Avatar = event.target.result;
+    try {
+      isUploadingAvatar.value = true;
+      await userService.update(user_id.value, { avatar: base64Avatar });
+      user.value.avatar = base64Avatar;
+      localStorage.setItem("avatar", base64Avatar);
+      push.success("Đổi ảnh đại diện thành công! 🎉");
+    } catch (err) {
+      console.error("Lỗi cập nhật avatar:", err);
+      push.error("Không thể cập nhật ảnh đại diện!");
+    } finally {
+      isUploadingAvatar.value = false;
+      if (avatarInputRef.value) {
+        avatarInputRef.value.value = "";
+      }
+    }
+  };
+  reader.readAsDataURL(file);
+};
+
+// Address Modal State
+const showAddressModal = ref(false);
+const isEditingAddr = ref(false);
+const editingAddrId = ref(null);
+const tempLabel = ref('Nhà riêng');
+const tempRecipientName = ref('');
+const tempPhone = ref('');
+const tempProvinceCode = ref('');
+const tempProvinceName = ref('');
+const tempDistrictCode = ref('');
+const tempDistrictName = ref('');
+const tempWardCode = ref('');
+const tempWardName = ref('');
+const tempAddressDetail = ref('');
+const tempIsDefault = ref(false);
+
+const provinces = ref([]);
+const districts = ref([]);
+const wards = ref([]);
+
+// Bank Account Modal State
+const showBankModal = ref(false);
+const isEditingBank = ref(false);
+const editingBankId = ref(null);
+const tempBankName = ref('MB Bank (Ngân hàng Quân Đội)');
+const tempAccountName = ref('');
+const tempAccountNumber = ref('');
+const tempBankIsDefault = ref(false);
+
+const popularBanks = [
+  "MB Bank (Ngân hàng Quân Đội)",
+  "Vietcombank (VCB)",
+  "Techcombank (TCB)",
+  "BIDV",
+  "VietinBank",
+  "VPBank",
+  "ACB",
+  "TPBank",
+  "Sacombank",
+  "VIB",
+  "Agribank"
+];
+
+// Order Detail Modal State
+const selectedOrder = ref(null);
+const showOrderDetailModal = ref(false);
+
+// Return / Refund Modal State
+const showReturnModal = ref(false);
+const orderToReturn = ref(null);
+const returnReason = ref('Sản phẩm bị lỗi / vỡ hỏng do vận chuyển');
+const returnNote = ref('');
+const isSubmittingReturn = ref(false);
+const returnReasonOptions = [
+  'Sản phẩm bị lỗi / vỡ hỏng do vận chuyển',
+  'Giao sai sản phẩm / sai dung tích',
+  'Sản phẩm cận hạn sử dụng (<6 tháng)',
+  'Bị kích ứng mẩn đỏ khi sử dụng (kèm ảnh da)',
+  'Khác (Cần ghi rõ trong mô tả)'
+];
+
+let profilePollInterval = null;
+
+const fetchData = async (silent = false) => {
+  if (!silent) loading.value = true;
   try {
-    await borrowService.updateOrder(borrowId, { action: "renew" });
-    await fetchData();
+    const userData = await userService.getUser(user_id.value);
+    user.value = userData;
+
+    if (!isEditingUser.value) {
+      editFirstName.value = userData.first_name || '';
+      editLastName.value = userData.last_name || '';
+      editEmail.value = userData.email || '';
+      editPhone.value = userData.phone || '';
+      editBirthday.value = userData.birthday ? userData.birthday.split('T')[0] : '';
+      editGender.value = userData.gender !== false;
+    }
+
+    // Load Addresses
+    if (!silent) {
+      addresses.value = await addressService.getAddresses();
+    }
+
+    // Load Bank Accounts
+    try {
+      const resBanks = await api.get('/api/user/banks');
+      bankAccounts.value = resBanks.data || [];
+    } catch (e) {
+      console.error("Lỗi lấy ngân hàng:", e);
+    }
+
+    // Load Points
+    try {
+      const resPoints = await api.get('/api/user/points');
+      pointsInfo.value = resPoints.data || { points: 0, rank: 'bronze', totalEarned: 0, totalSpent: 0 };
+
+      const resHistory = await api.get('/api/user/points/history');
+      pointHistory.value = resHistory.data || [];
+    } catch (e) {
+      console.error("Lỗi lấy điểm:", e);
+    }
+
+    // Load Orders
+    const resOrders = await orderService.getAllOrders({ user_id: user_id.value });
+    orders.value = Array.isArray(resOrders) ? resOrders : (resOrders?.orders || []);
+
+    // Load Location Provinces
+    if (!silent) {
+      provinces.value = await LocationService.getProvinces();
+    }
   } catch (error) {
-    if (error.response?.data?.message) {
-      alert("Lỗi: " + error.response.data.message);
+    console.error("Lỗi fetchData:", error);
+    if (!silent) push.error("Không thể tải thông tin hồ sơ");
+  } finally {
+    if (!silent) loading.value = false;
+  }
+};
+
+const handleUpdateUser = async () => {
+  try {
+    const payload = {
+      first_name: editFirstName.value,
+      last_name: editLastName.value,
+      email: editEmail.value,
+      phone: editPhone.value,
+      birthday: editBirthday.value,
+      gender: editGender.value,
+    };
+    await userService.update(user_id.value, payload);
+    push.success("Cập nhật thông tin cá nhân thành công!");
+    isEditingUser.value = false;
+    fetchData();
+  } catch (err) {
+    console.error(err);
+    push.error("Cập nhật thất bại. Vui lòng kiểm tra lại!");
+  }
+};
+
+const handleChangePassword = async () => {
+  if (!currentPassword.value || !newPassword.value) {
+    push.warning("Vui lòng nhập mật khẩu hiện tại và mật khẩu mới!");
+    return;
+  }
+  if (newPassword.value !== confirmPassword.value) {
+    push.warning("Mật khẩu xác nhận không khớp!");
+    return;
+  }
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+={}\[\]:;<>,.~]).{8,32}$/;
+  if (!passwordRegex.test(newPassword.value)) {
+    push.warning("Mật khẩu mới phải từ 8-32 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (@$!%*?&#...)");
+    return;
+  }
+  try {
+    isChangingPassword.value = true;
+    await userService.update(user_id.value, {
+      currentPassword: currentPassword.value,
+      password: newPassword.value
+    });
+    push.success("Đổi mật khẩu thành công! Vui lòng đăng nhập lại.");
+    currentPassword.value = "";
+    newPassword.value = "";
+    confirmPassword.value = "";
+    
+    // Đăng xuất tự động
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.href = "/user/login";
+    }, 1500);
+  } catch (err) {
+    console.error(err);
+    push.error(err.response?.data?.message || "Đổi mật khẩu thất bại!");
+  } finally {
+    isChangingPassword.value = false;
+  }
+};
+
+// === ADDRESS METHODS ===
+const onProvinceChange = async () => {
+  tempDistrictCode.value = "";
+  tempWardCode.value = "";
+  districts.value = [];
+  wards.value = [];
+  if (tempProvinceCode.value) {
+    districts.value = await LocationService.getDistricts(tempProvinceCode.value);
+  }
+};
+
+const onDistrictChange = async () => {
+  tempWardCode.value = "";
+  wards.value = [];
+  if (tempDistrictCode.value) {
+    wards.value = await LocationService.getWards(tempDistrictCode.value);
+  }
+};
+
+const openAddAddrModal = () => {
+  isEditingAddr.value = false;
+  editingAddrId.value = null;
+  tempLabel.value = "Nhà riêng";
+  tempRecipientName.value = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim();
+  tempPhone.value = user.value.phone || '';
+  tempProvinceCode.value = '';
+  tempDistrictCode.value = '';
+  tempWardCode.value = '';
+  tempAddressDetail.value = '';
+  tempIsDefault.value = addresses.value.length === 0;
+  districts.value = [];
+  wards.value = [];
+  showAddressModal.value = true;
+};
+
+const openEditAddrModal = async (addr) => {
+  isEditingAddr.value = true;
+  editingAddrId.value = addr._id;
+  tempLabel.value = addr.label || "Nhà riêng";
+  tempRecipientName.value = addr.recipientName || '';
+  tempPhone.value = addr.phone || '';
+  tempProvinceCode.value = addr.provinceCode || '';
+  tempDistrictCode.value = addr.districtCode || '';
+  tempWardCode.value = addr.wardCode || '';
+  tempAddressDetail.value = addr.addressDetail || '';
+  tempIsDefault.value = addr.isDefault || false;
+
+  if (tempProvinceCode.value) {
+    districts.value = await LocationService.getDistricts(tempProvinceCode.value);
+  }
+  if (tempDistrictCode.value) {
+    wards.value = await LocationService.getWards(tempDistrictCode.value);
+  }
+  showAddressModal.value = true;
+};
+
+const saveAddress = async () => {
+  if (!tempProvinceCode.value || !tempDistrictCode.value || !tempWardCode.value || !tempAddressDetail.value.trim() || !tempPhone.value.trim()) {
+    push.warning("Vui lòng điền đầy đủ Tỉnh, Huyện, Xã, Địa chỉ chi tiết và Số điện thoại!");
+    return;
+  }
+
+  const p = provinces.value.find(x => x.code == tempProvinceCode.value);
+  const d = districts.value.find(x => x.code == tempDistrictCode.value);
+  const w = wards.value.find(x => x.code == tempWardCode.value);
+
+  const payload = {
+    label: tempLabel.value,
+    recipientName: tempRecipientName.value,
+    phone: tempPhone.value,
+    provinceCode: String(tempProvinceCode.value),
+    provinceName: p ? p.name : '',
+    districtCode: String(tempDistrictCode.value),
+    districtName: d ? d.name : '',
+    wardCode: String(tempWardCode.value),
+    wardName: w ? w.name : '',
+    addressDetail: tempAddressDetail.value,
+    isDefault: tempIsDefault.value
+  };
+
+  try {
+    if (isEditingAddr.value) {
+      await addressService.updateAddress(editingAddrId.value, payload);
+      push.success("Cập nhật địa chỉ thành công!");
     } else {
-      alert("Không thể gia hạn sản phẩm này");
+      await addressService.addAddress(payload);
+      push.success("Thêm địa chỉ thành công!");
+    }
+    showAddressModal.value = false;
+    addresses.value = await addressService.getAddresses();
+  } catch (err) {
+    console.error(err);
+    push.error("Lỗi khi lưu địa chỉ!");
+  }
+};
+
+const handleSetDefaultAddr = async (id) => {
+  try {
+    await addressService.setDefaultAddress(id);
+    push.success("Đã đặt địa chỉ mặc định!");
+    addresses.value = await addressService.getAddresses();
+  } catch (err) {
+    console.error(err);
+    push.error("Không thể đặt địa chỉ mặc định");
+  }
+};
+
+const handleDeleteAddr = async (id) => {
+  if (confirm("Xác nhận xóa địa chỉ này?")) {
+    try {
+      await addressService.deleteAddress(id);
+      push.success("Đã xóa địa chỉ thành công!");
+      addresses.value = await addressService.getAddresses();
+    } catch (err) {
+      console.error(err);
+      push.error("Không thể xóa địa chỉ");
     }
   }
 };
 
-const isBookOverdue = (returnDateStr, status) => {
-  return new Date() > new Date(returnDateStr) && status === 'borrowing';
+// === BANK ACCOUNT METHODS ===
+const openAddBankModal = () => {
+  isEditingBank.value = false;
+  editingBankId.value = null;
+  tempBankName.value = popularBanks[0];
+  tempAccountName.value = `${user.value.first_name || ''} ${user.value.last_name || ''}`.trim().toUpperCase();
+  tempAccountNumber.value = '';
+  tempBankIsDefault.value = bankAccounts.value.length === 0;
+  showBankModal.value = true;
 };
 
-const isUserSuspended = computed(() => {
-  if (!user.value || !user.value.suspended_until) return false;
-  return new Date(user.value.suspended_until) > new Date();
+const openEditBankModal = (bank) => {
+  isEditingBank.value = true;
+  editingBankId.value = bank._id;
+  tempBankName.value = bank.bank_name;
+  tempAccountName.value = bank.account_name;
+  tempAccountNumber.value = bank.account_number_raw || '';
+  tempBankIsDefault.value = bank.isDefault || false;
+  showBankModal.value = true;
+};
+
+const saveBankAccount = async () => {
+  if (!tempBankName.value || !tempAccountName.value.trim() || !tempAccountNumber.value.trim()) {
+    push.warning("Vui lòng điền Tên ngân hàng, Tên chủ tài khoản và Số tài khoản!");
+    return;
+  }
+
+  const payload = {
+    bank_name: tempBankName.value,
+    account_name: tempAccountName.value.trim().toUpperCase(),
+    account_number: tempAccountNumber.value.trim(),
+    isDefault: tempBankIsDefault.value
+  };
+
+  try {
+    if (isEditingBank.value) {
+      await api.put(`/api/user/banks/${editingBankId.value}`, payload);
+      push.success("Cập nhật ngân hàng thành công!");
+    } else {
+      await api.post('/api/user/banks', payload);
+      push.success("Liên kết ngân hàng thành công!");
+    }
+    showBankModal.value = false;
+    const res = await api.get('/api/user/banks');
+    bankAccounts.value = res.data || [];
+  } catch (err) {
+    console.error(err);
+    push.error("Không thể lưu thông tin ngân hàng!");
+  }
+};
+
+const handleSetDefaultBank = async (id) => {
+  try {
+    await api.patch(`/api/user/banks/${id}/default`);
+    push.success("Đã đặt ngân hàng mặc định!");
+    const res = await api.get('/api/user/banks');
+    bankAccounts.value = res.data || [];
+  } catch (err) {
+    console.error(err);
+    push.error("Lỗi đặt ngân hàng mặc định");
+  }
+};
+
+const handleDeleteBank = async (id) => {
+  if (confirm("Xác nhận xóa tài khoản ngân hàng này?")) {
+    try {
+      await api.delete(`/api/user/banks/${id}`);
+      push.success("Đã xóa tài khoản ngân hàng!");
+      const res = await api.get('/api/user/banks');
+      bankAccounts.value = res.data || [];
+    } catch (err) {
+      console.error(err);
+      push.error("Lỗi xóa ngân hàng");
+    }
+  }
+};
+
+// Filtered Points History
+const filteredPointHistory = computed(() => {
+  if (pointFilter.value === 'EARN') {
+    return pointHistory.value.filter(h => h.type === 'EARN' || (h.type === 'ADJUST' && h.amount > 0));
+  }
+  if (pointFilter.value === 'SPEND') {
+    return pointHistory.value.filter(h => h.type === 'SPEND' || (h.type === 'ADJUST' && h.amount < 0));
+  }
+  return pointHistory.value;
 });
 
-onMounted(fetchData);
+const getRankBadgeClass = (rank) => {
+  switch (rank?.toLowerCase()) {
+    case 'diamond': return 'bg-purple-100 text-purple-700 border-purple-300';
+    case 'gold': return 'bg-amber-100 text-amber-800 border-amber-300';
+    case 'silver': return 'bg-slate-200 text-slate-700 border-slate-300';
+    default: return 'bg-emerald-100 text-emerald-800 border-emerald-300';
+  }
+};
+
+const getRankLabel = (rank) => {
+  switch (rank?.toLowerCase()) {
+    case 'diamond': return '💎 Hạng Kim Cương';
+    case 'gold': return '🥇 Hạng Vàng';
+    case 'silver': return '🥈 Hạng Bạc';
+    default: return '🥉 Hạng Đồng';
+  }
+};
+
+const formatPrice = (price) => {
+  if (!price) return "0 đ";
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return 'N/A';
+  return new Date(dateStr).toLocaleString('vi-VN');
+};
+
+const getOrderStatusInfo = (status) => {
+  switch (status?.toLowerCase()) {
+    case 'pending':
+      return { label: 'Chờ xác nhận', badgeClass: 'bg-amber-100 text-amber-800 border-amber-200' };
+    case 'confirmed':
+      return { label: 'Đã xác nhận', badgeClass: 'bg-blue-100 text-blue-800 border-blue-200' };
+    case 'shipping':
+      return { label: '🚚 Đang giao hàng', badgeClass: 'bg-purple-100 text-purple-800 border-purple-200' };
+    case 'delivered':
+      return { label: '✓ Đã nhận hàng', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+    case 'completed':
+      return { label: '✓ Đã hoàn thành', badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200' };
+    case 'return_requested':
+      return { label: '⏳ Chờ duyệt hoàn hàng', badgeClass: 'bg-orange-100 text-orange-800 border-orange-200' };
+    case 'returning':
+      return { label: '🚚 Đang chuyển hoàn về kho', badgeClass: 'bg-purple-100 text-purple-800 border-purple-200' };
+    case 'returned':
+      return { label: '📦 Đã nhận hàng hoàn', badgeClass: 'bg-slate-200 text-slate-800 border-slate-300' };
+    case 'refunded':
+      return { label: '💰 Đã hoàn tiền', badgeClass: 'bg-teal-100 text-teal-800 border-teal-200' };
+    case 'cancelled':
+      return { label: '✕ Đã hủy đơn', badgeClass: 'bg-red-100 text-red-700 border-red-200' };
+    default:
+      return { label: status || 'N/A', badgeClass: 'bg-slate-100 text-slate-700 border-slate-200' };
+  }
+};
+
+const handleCancelOrder = async (order) => {
+  if (!confirm(`Bạn có chắc chắn muốn hủy đơn hàng #${order.order_code || order._id.slice(-8).toUpperCase()} không?`)) return;
+  try {
+    await orderService.updateOrder(order._id, { status: 'cancelled' });
+    push.success('Hủy đơn hàng thành công!');
+    fetchData();
+  } catch (err) {
+    console.error(err);
+    push.error(err.response?.data?.message || 'Không thể hủy đơn hàng!');
+  }
+};
+
+const formatAddress = (addr) => {
+  if (!addr) return '---';
+  if (typeof addr === 'string') return addr;
+  if (addr.addressDetail) {
+    return `${addr.addressDetail}${addr.wardName ? ', ' + addr.wardName : ''}${addr.districtName ? ', ' + addr.districtName : ''}${addr.provinceName ? ', ' + addr.provinceName : ''}`;
+  }
+  return '---';
+};
+
+const openOrderDetail = (order) => {
+  selectedOrder.value = order;
+  showOrderDetailModal.value = true;
+};
+
+const openReturnModal = (order) => {
+  orderToReturn.value = order;
+  returnReason.value = 'Sản phẩm bị lỗi / vỡ hỏng do vận chuyển';
+  returnNote.value = '';
+  showReturnModal.value = true;
+};
+
+const submitReturnRequest = async () => {
+  if (!orderToReturn.value) return;
+  try {
+    isSubmittingReturn.value = true;
+    await orderService.updateOrder(orderToReturn.value._id, {
+      status: 'return_requested',
+      return_reason: returnReason.value,
+      return_note: returnNote.value,
+      return_date: new Date().toISOString()
+    });
+    push.success('Gửi yêu cầu Trả hàng / Hoàn tiền thành công! Quản trị viên sẽ xử lý sớm nhất.');
+    showReturnModal.value = false;
+    showOrderDetailModal.value = false;
+    fetchData();
+  } catch (err) {
+    console.error(err);
+    push.error(err.response?.data?.message || 'Không thể gửi yêu cầu hoàn hàng!');
+  } finally {
+    isSubmittingReturn.value = false;
+  }
+};
+
+const handleVisibilityChange = () => {
+  if (document.visibilityState === 'visible') {
+    fetchData(true);
+  }
+};
+
+onMounted(() => {
+  fetchData();
+  profilePollInterval = setInterval(() => {
+    fetchData(true);
+  }, 15000);
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+});
+
+onUnmounted(() => {
+  if (profilePollInterval) clearInterval(profilePollInterval);
+  document.removeEventListener('visibilitychange', handleVisibilityChange);
+});
 </script>
 
 <template>
-  <div class="up-page">
+  <div class="min-h-screen bg-[#FAF8F5] text-slate-800 flex flex-col font-sans">
     <Header />
 
-    <main class="up-main">
+    <main class="flex-grow max-w-7xl mx-auto px-4 md:px-8 py-8 w-full">
       <div v-if="loading" class="flex justify-center items-center py-32">
-        <span class="loading loading-spinner text-teal-500 loading-lg"></span>
+        <span class="loading loading-spinner text-[#087443] loading-lg"></span>
       </div>
 
-      <div v-else class="up-container">
-        <!-- Suspension Alert -->
-        <div v-if="isUserSuspended" class="up-alert">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
-          <div>
-            <h3 class="font-bold text-base text-red-200">Tài khoản của bạn đang tạm ngưng cấm đơn hàng!</h3>
-            <p class="text-sm text-red-300 mt-1">Lý do: Vi phạm trả sản phẩm trễ hạn. Hạn cấm đến: {{ new Date(user.suspended_until).toLocaleString('vi-VN') }}</p>
-          </div>
-        </div>
-
-        <!-- Profile Card -->
-        <div class="up-card">
-          <!-- Profile Header Section -->
-          <div class="up-header">
-            <div class="up-avatar-wrap">
-              <div class="up-avatar">
-                <img v-if="user.avatar" :src="user.avatar" alt="Avatar" class="up-avatar-img" />
-                <span v-else class="up-avatar-placeholder">{{ user.first_name?.charAt(0) || 'U' }}</span>
-              </div>
-            </div>
-
-            <div class="up-info">
-              <h1 class="up-name">{{ user.last_name }} {{ user.first_name }}</h1>
-              <div class="up-tags">
-                <span class="up-tag up-tag--username">@{{ user.username }}</span>
-                <span class="up-tag up-tag--points">💎 {{ user.points || 0 }} Điểm thân thiết</span>
-              </div>
-            </div>
-
-            <div class="up-actions">
-              <button @click="goToUserProfileEdit(user_id)" class="up-btn up-btn--primary">
-                Sửa hồ sơ
-              </button>
-              <button @click="logOut" class="up-btn up-btn--secondary">
-                Đăng xuất
-              </button>
-            </div>
+      <div v-else class="space-y-8">
+        
+        <!-- HEADER OVERVIEW BANNER CARD (PREMIUM HIGH CONTRAST) -->
+        <div class="relative overflow-hidden rounded-3xl p-6 md:p-8 shadow-2xl text-left border border-emerald-500/30" style="background: linear-gradient(135deg, #043825 0%, #065F46 50%, #064E3B 100%);">
+          <!-- Ambient Background Circles -->
+          <div class="absolute -right-16 -top-16 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-emerald-300/10 rounded-full blur-2xl pointer-events-none"></div>
+          <div class="absolute right-4 bottom-2 opacity-5 pointer-events-none text-white select-none">
+            <span class="material-symbols-outlined" style="font-size: 200px;">account_circle</span>
           </div>
 
-          <!-- Profile Nav Tabs -->
-          <div class="up-tabs">
-            <button @click="activeTab = 'info'" class="up-tab" :class="{'up-tab--active': activeTab === 'info'}">Thông tin</button>
-            <button @click="activeTab = 'history'" class="up-tab" :class="{'up-tab--active': activeTab === 'history'}">Lịch sử mượn</button>
-            <button @click="activeTab = 'reviews'" class="up-tab" :class="{'up-tab--active': activeTab === 'reviews'}">Đánh giá</button>
-          </div>
-
-          <!-- Profile Details Section -->
-          <div class="up-content">
-            <!-- Tab: Personal Info -->
-            <div v-if="activeTab === 'info'" class="up-tab-content">
-              <div class="up-info-grid">
-                <div class="up-info-item">
-                  <p class="up-info-label">Họ và tên</p>
-                  <p class="up-info-value">{{ user.last_name }} {{ user.first_name }}</p>
-                </div>
-                <div class="up-info-item">
-                  <p class="up-info-label">Thông tin cá nhân</p>
-                  <div class="flex items-center gap-2 mt-1">
-                    <span class="up-badge" :class="user.gender ? 'up-badge--male' : 'up-badge--female'">
-                      {{ user.gender ? 'Nam' : 'Nữ' }}
-                    </span>
-                    <span class="up-info-value font-normal">{{ user.birthday ? new Date(user.birthday).toLocaleDateString('vi-VN') : "---" }}</span>
-                  </div>
-                </div>
-                <div class="up-info-item">
-                  <p class="up-info-label">Liên hệ</p>
-                  <p class="up-info-value">{{ user.phone || "---" }}</p>
-                </div>
-                <div class="up-info-item">
-                  <p class="up-info-label">Địa chỉ hiện tại</p>
-                  <p class="up-info-value">{{ user.address || "---" }}</p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Tab: Borrowing History -->
-            <div v-if="activeTab === 'history'" class="up-tab-content">
-              <div v-if="borrowings.length === 0" class="up-empty">
-                <p>Chưa có lịch sử đơn hàng</p>
-              </div>
-              <div v-else class="up-table-wrap">
-                <table class="up-table">
-                  <thead>
-                    <tr>
-                      <th>Sản phẩm</th>
-                      <th>Ngày mượn</th>
-                      <th>Hạn trả</th>
-                      <th>Trạng thái</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="borrow in borrowings" :key="borrow._id">
-                      <td class="font-bold text-white">{{ borrow.product_id?.title || 'Sản phẩm đã bị xóa' }}</td>
-                      <td>{{ new Date(borrow.borrow_date).toLocaleDateString('vi-VN') }}</td>
-                      <td>
-                        <span :class="{'text-red-500 font-bold': new Date() > new Date(borrow.return_date) && borrow.status !== 'returned'}">
-                          {{ new Date(borrow.return_date).toLocaleDateString('vi-VN') }}
-                        </span>
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-2">
-                          <span v-if="borrow.status === 'pending'" class="up-status-badge up-status-badge--warning">Chờ duyệt</span>
-                          <span v-else-if="borrow.status === 'borrowing' && isBookOverdue(borrow.return_date, borrow.status)" class="up-status-badge up-status-badge--danger">Quá hạn</span>
-                          <span v-else-if="borrow.status === 'borrowing'" class="up-status-badge up-status-badge--info">Đang mượn</span>
-                          <span v-else-if="borrow.status === 'returned'" class="up-status-badge up-status-badge--success">Đã trả</span>
-                          <span v-else-if="borrow.status === 'rejected'" class="up-status-badge up-status-badge--danger">Từ chối</span>
-                          <span v-else-if="borrow.status === 'overdue'" class="up-status-badge up-status-badge--danger">Quá hạn</span>
-                          <span v-else-if="borrow.status === 'return_pending'" class="up-status-badge up-status-badge--warning">Chờ trả</span>
-
-                          <!-- Renew Button -->
-                          <button v-if="borrow.status === 'borrowing' && !isBookOverdue(borrow.return_date, borrow.status)" 
-                                  @click="handleRenew(borrow._id)" 
-                                  class="up-renew-btn">
-                            Gia hạn +7
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            <!-- Tab: User Reviews -->
-            <div v-if="activeTab === 'reviews'" class="up-tab-content">
-              <div v-if="userReviews.length === 0" class="up-empty">
-                <p>Bạn chưa có đánh giá nào</p>
-              </div>
-              <div v-else class="up-reviews-grid">
-                <div v-for="review in userReviews" :key="review._id" class="up-review-card">
-                  <div class="up-review-header">
-                    <div>
-                      <span class="up-review-prod">Sản phẩm: {{ review.product_id?.title || 'Sản phẩm đã xóa' }}</span>
-                      <div class="up-stars">
-                        <svg v-for="i in 5" :key="i" xmlns="http://www.w3.org/2000/svg" 
-                            :class="i <= review.rating ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-700 fill-zinc-800'" 
-                            class="h-3 w-3" viewBox="0 0 20 20">
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                        </svg>
-                      </div>
-                    </div>
-                    <span class="text-xs text-zinc-500">{{ new Date(review.createdAt).toLocaleDateString('vi-VN') }}</span>
-                  </div>
-                  <p class="up-review-comment">"{{ review.comment }}"</p>
+          <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
+            <!-- Left: Avatar & User Identity -->
+            <div class="flex items-center gap-5 sm:gap-6">
+              <!-- Avatar Circle -->
+              <div class="relative group cursor-pointer shrink-0" @click="triggerAvatarUpload" title="Bấm vào hình tròn để đổi ảnh đại diện">
+                <input 
+                  type="file" 
+                  ref="avatarInputRef" 
+                  accept="image/*" 
+                  class="hidden" 
+                  @change="onAvatarFileSelected" 
+                />
+                
+                <div class="relative w-20 h-20 md:w-24 md:h-24 rounded-full overflow-hidden border-4 border-white shadow-2xl ring-4 ring-white/20 group-hover:border-emerald-300 transition-all duration-300 bg-white">
+                  <img 
+                    :src="user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent((user.first_name || 'U') + ' ' + (user.last_name || ''))}&background=087443&color=fff&bold=true`" 
+                    class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    alt="User Avatar"
+                  />
                   
-                  <div v-if="review.reply" class="up-review-reply">
-                    <span class="up-reply-label">Phản hồi của hệ thống</span>
-                    <p class="up-reply-text">{{ review.reply }}</p>
+                  <!-- Hover Overlay with Camera Icon -->
+                  <div class="absolute inset-0 bg-black/60 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center text-white">
+                    <span class="material-symbols-outlined text-2xl mb-0.5">photo_camera</span>
+                    <span class="text-[9px] font-black tracking-wider uppercase">Đổi ảnh</span>
+                  </div>
+
+                  <!-- Loading spinner when uploading -->
+                  <div v-if="isUploadingAvatar" class="absolute inset-0 bg-black/75 flex items-center justify-center">
+                    <span class="loading loading-spinner loading-sm text-white"></span>
                   </div>
                 </div>
+
+                <!-- Camera badge at bottom-right corner -->
+                <button 
+                  type="button"
+                  class="absolute -bottom-1 -right-1 w-7 h-7 bg-white text-emerald-800 border-2 border-emerald-600 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform duration-200 cursor-pointer" 
+                  title="Tải ảnh mới">
+                  <span class="material-symbols-outlined text-sm font-bold">photo_camera</span>
+                </button>
+              </div>
+
+              <!-- User Information -->
+              <div class="space-y-2">
+                <div class="flex items-center gap-3 flex-wrap">
+                  <h1 class="text-2xl md:text-3xl font-black tracking-tight" style="color: #FFFFFF !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                    {{ user.first_name || 'Khách hàng' }} {{ user.last_name || '' }}
+                  </h1>
+                  <span class="px-3 py-1 text-xs font-black rounded-full border shadow-sm flex items-center gap-1 bg-amber-400/20 text-amber-300 border-amber-300/40 backdrop-blur-md">
+                    {{ getRankLabel(user.rank) }}
+                  </span>
+                </div>
+
+                <div class="flex items-center gap-2 flex-wrap text-xs">
+                  <span class="px-2.5 py-1 rounded-lg bg-black/25 text-white/95 font-medium border border-white/10 flex items-center gap-1.5 backdrop-blur-xs">
+                    <span>📧</span>
+                    <span>{{ user.email || user.username }}</span>
+                  </span>
+                  <span class="px-2.5 py-1 rounded-lg bg-black/25 text-white/95 font-medium border border-white/10 flex items-center gap-1.5 backdrop-blur-xs">
+                    <span>📱</span>
+                    <span>{{ user.phone || 'Chưa cập nhật SĐT' }}</span>
+                  </span>
+                </div>
+
+                <p class="text-[11px] font-medium flex items-center gap-1.5" style="color: #A7F3D0 !important;">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span>Thành viên SkinMedi AI từ: {{ formatDate(user.createdAt).split(',')[0] }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Right: Quick Stat Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full lg:w-auto">
+              <!-- Points -->
+              <div class="bg-white/15 hover:bg-white/20 transition-all duration-200 border border-white/25 p-3.5 md:p-4 rounded-2xl text-center backdrop-blur-md shadow-lg flex flex-col justify-center items-center min-w-[100px]">
+                <span class="font-black text-xl md:text-2xl block" style="color: #FDE047 !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  ⭐ {{ pointsInfo.points }}
+                </span>
+                <span class="text-[10px] md:text-[11px] uppercase tracking-wider font-extrabold mt-1 block" style="color: #D1FAE5 !important;">
+                  Điểm Xu
+                </span>
+              </div>
+
+              <!-- Orders -->
+              <div class="bg-white/15 hover:bg-white/20 transition-all duration-200 border border-white/25 p-3.5 md:p-4 rounded-2xl text-center backdrop-blur-md shadow-lg flex flex-col justify-center items-center min-w-[100px]">
+                <span class="font-black text-xl md:text-2xl block" style="color: #FFFFFF !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  🛍 {{ orders.length }}
+                </span>
+                <span class="text-[10px] md:text-[11px] uppercase tracking-wider font-extrabold mt-1 block" style="color: #D1FAE5 !important;">
+                  Đơn hàng
+                </span>
+              </div>
+
+              <!-- Addresses -->
+              <div class="bg-white/15 hover:bg-white/20 transition-all duration-200 border border-white/25 p-3.5 md:p-4 rounded-2xl text-center backdrop-blur-md shadow-lg flex flex-col justify-center items-center min-w-[100px]">
+                <span class="font-black text-xl md:text-2xl block" style="color: #FFFFFF !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  📍 {{ addresses.length }}
+                </span>
+                <span class="text-[10px] md:text-[11px] uppercase tracking-wider font-extrabold mt-1 block" style="color: #D1FAE5 !important;">
+                  Địa chỉ
+                </span>
+              </div>
+
+              <!-- Banks -->
+              <div class="bg-white/15 hover:bg-white/20 transition-all duration-200 border border-white/25 p-3.5 md:p-4 rounded-2xl text-center backdrop-blur-md shadow-lg flex flex-col justify-center items-center min-w-[100px]">
+                <span class="font-black text-xl md:text-2xl block" style="color: #FFFFFF !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+                  💳 {{ bankAccounts.length }}
+                </span>
+                <span class="text-[10px] md:text-[11px] uppercase tracking-wider font-extrabold mt-1 block" style="color: #D1FAE5 !important;">
+                  Ngân hàng
+                </span>
               </div>
             </div>
           </div>
         </div>
+
+        <!-- MAIN DASHBOARD NAVIGATION TABS & CONTENT LAYOUT -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 text-left items-start">
+          
+          <!-- LEFT SIDEBAR TAB BUTTONS -->
+          <div class="lg:col-span-3 bg-white border border-[#EBE7DF] rounded-3xl p-3 shadow-xs space-y-1">
+            <button 
+              @click="activeTab = 'info'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'info' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">person</span>
+              <span>Thông tin cá nhân</span>
+            </button>
+
+            <button 
+              @click="activeTab = 'address'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'address' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">location_on</span>
+              <span>Địa chỉ giao hàng ({{ addresses.length }})</span>
+            </button>
+
+            <button 
+              @click="activeTab = 'bank'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'bank' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">account_balance</span>
+              <span>Ngân hàng & Thanh toán</span>
+            </button>
+
+            <button 
+              @click="activeTab = 'points'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'points' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">stars</span>
+              <span>Điểm SkinMedi ({{ pointsInfo.points }} Xu)</span>
+            </button>
+
+            <button 
+              @click="activeTab = 'orders'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'orders' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">shopping_bag</span>
+              <span>Đơn hàng của tôi ({{ orders.length }})</span>
+            </button>
+
+            <button 
+              @click="activeTab = 'security'" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all"
+              :class="activeTab === 'security' ? 'bg-[#087443] text-white shadow-md' : 'text-slate-600 hover:bg-emerald-50 hover:text-[#087443]'"
+            >
+              <span class="material-symbols-outlined text-lg">shield</span>
+              <span>Bảo mật tài khoản</span>
+            </button>
+
+            <hr class="border-slate-100 my-2" />
+
+            <button 
+              @click="logOut" 
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold text-red-600 hover:bg-red-50 transition-all"
+            >
+              <span class="material-symbols-outlined text-lg">logout</span>
+              <span>Đăng xuất tài khoản</span>
+            </button>
+          </div>
+
+          <!-- RIGHT CONTENT DISPLAY PANELS -->
+          <div class="lg:col-span-9 space-y-6">
+
+            <!-- TAB 1: THÔNG TIN CÁ NHÂN -->
+            <div v-if="activeTab === 'info'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                    <span class="material-symbols-outlined">badge</span>
+                    <span>Thông tin cá nhân & Hồ sơ</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">Quản lý tên, thông tin liên hệ và lộ trình chăm sóc da</p>
+                </div>
+                <button 
+                  @click="isEditingUser = !isEditingUser" 
+                  class="btn btn-sm btn-outline border-slate-300 text-xs font-bold rounded-xl"
+                >
+                  {{ isEditingUser ? 'Hủy chỉnh sửa' : '✏️ Chỉnh sửa' }}
+                </button>
+              </div>
+
+              <!-- View / Edit Form -->
+              <form @submit.prevent="handleUpdateUser" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Họ & Tên đệm</label>
+                  <input v-model="editFirstName" :disabled="!isEditingUser" type="text" class="input input-bordered input-sm w-full rounded-xl text-xs" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Tên</label>
+                  <input v-model="editLastName" :disabled="!isEditingUser" type="text" class="input input-bordered input-sm w-full rounded-xl text-xs" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Email</label>
+                  <input v-model="editEmail" :disabled="!isEditingUser" type="email" class="input input-bordered input-sm w-full rounded-xl text-xs bg-slate-50" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Số điện thoại</label>
+                  <input v-model="editPhone" :disabled="!isEditingUser" type="text" class="input input-bordered input-sm w-full rounded-xl text-xs" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Ngày sinh</label>
+                  <input v-model="editBirthday" :disabled="!isEditingUser" type="date" class="input input-bordered input-sm w-full rounded-xl text-xs" />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Giới tính</label>
+                  <select v-model="editGender" :disabled="!isEditingUser" class="select select-bordered select-sm w-full rounded-xl text-xs">
+                    <option :value="true">Nam</option>
+                    <option :value="false">Nữ</option>
+                  </select>
+                </div>
+
+                <div v-if="isEditingUser" class="col-span-full flex justify-end gap-2 pt-2">
+                  <button type="button" @click="isEditingUser = false" class="btn btn-ghost btn-sm rounded-xl text-xs">Hủy</button>
+                  <button type="submit" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl px-6 text-xs font-bold">
+                    💾 Lưu thay đổi
+                  </button>
+                </div>
+              </form>
+
+              <!-- Hồ sơ da liễu -->
+              <div class="border-t border-slate-100 pt-6 space-y-3">
+                <h4 class="text-sm font-extrabold text-[#064E3B] flex items-center gap-2">
+                  <span class="material-symbols-outlined text-emerald-600">dermatology</span>
+                  <span>Hồ sơ phân tích da liễu AI</span>
+                </h4>
+                <div class="bg-emerald-50/50 border border-emerald-100 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                  <div>
+                    <span class="text-slate-400 font-bold block mb-1">Loại da của bạn:</span>
+                    <span class="font-extrabold text-emerald-800 text-sm">
+                      {{ user.skin_profile?.skin_type || 'Chưa thực hiện test da' }}
+                    </span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 font-bold block mb-1">Tình trạng cần chăm sóc:</span>
+                    <div class="flex flex-wrap gap-1">
+                      <span v-for="c in (user.skin_profile?.conditions || [])" :key="c" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold">
+                        {{ c }}
+                      </span>
+                      <span v-if="!user.skin_profile?.conditions?.length" class="text-slate-500 italic">Chưa ghi nhận</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 2: ĐỊA CHỈ GIAO HÀNG -->
+            <div v-if="activeTab === 'address'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                    <span class="material-symbols-outlined">location_on</span>
+                    <span>Địa chỉ giao hàng</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">Địa chỉ sẽ được đồng bộ trực tiếp với trang Thanh toán Checkout</p>
+                </div>
+                <button @click="openAddAddrModal" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl text-xs font-bold flex items-center gap-1">
+                  <span>+ Thêm địa chỉ mới</span>
+                </button>
+              </div>
+
+              <div class="space-y-4">
+                <div 
+                  v-for="addr in addresses" 
+                  :key="addr._id" 
+                  class="p-5 rounded-2xl border transition-all flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs"
+                  :class="addr.isDefault ? 'border-emerald-600 bg-emerald-50/15' : 'border-slate-100 bg-white'"
+                >
+                  <div class="space-y-1.5">
+                    <div class="flex items-center gap-2">
+                      <span class="font-extrabold text-slate-800 text-sm">{{ addr.recipientName || user.first_name }}</span>
+                      <span class="text-slate-400 font-bold">|</span>
+                      <span class="font-bold text-slate-700">{{ addr.phone }}</span>
+                      <span v-if="addr.isDefault" class="bg-emerald-100 text-emerald-800 font-extrabold text-[10px] px-2 py-0.5 rounded-md border border-emerald-200">
+                        Mặc định
+                      </span>
+                      <span class="bg-slate-100 text-slate-600 font-bold text-[10px] px-2 py-0.5 rounded-md">
+                        {{ addr.label || 'Nhà riêng' }}
+                      </span>
+                    </div>
+                    <p class="text-slate-600 leading-relaxed font-light">
+                      {{ addr.addressDetail }}, {{ addr.wardName }}, {{ addr.districtName }}, {{ addr.provinceName }}
+                    </p>
+                  </div>
+
+                  <div class="flex items-center gap-2 shrink-0">
+                    <button v-if="!addr.isDefault" @click="handleSetDefaultAddr(addr._id)" class="btn btn-ghost btn-xs text-slate-600 hover:text-emerald-700 font-bold">
+                      Thiết lập mặc định
+                    </button>
+                    <button @click="openEditAddrModal(addr)" class="btn btn-ghost btn-xs text-blue-600 font-bold">
+                      Sửa
+                    </button>
+                    <button @click="handleDeleteAddr(addr._id)" class="btn btn-ghost btn-xs text-red-500 font-bold">
+                      Xóa
+                    </button>
+                  </div>
+                </div>
+
+                <div v-if="addresses.length === 0" class="text-center py-10 text-slate-400 text-xs font-serif italic border border-dashed rounded-2xl">
+                  Chưa có địa chỉ giao hàng nào. Vui lòng bấm vào nút "+ Thêm địa chỉ mới" ở trên.
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 3: NGÂN HÀNG & THANH TOÁN -->
+            <div v-if="activeTab === 'bank'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                    <span class="material-symbols-outlined">account_balance</span>
+                    <span>Ngân hàng & Phương thức thanh toán</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">Lưu tài khoản ngân hàng để nhận hoàn tiền hoặc lưu vết thanh toán</p>
+                </div>
+                <button @click="openAddBankModal" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl text-xs font-bold flex items-center gap-1">
+                  <span>+ Thêm ngân hàng</span>
+                </button>
+              </div>
+
+              <!-- Security Notice Banner -->
+              <div class="flex items-start gap-3 bg-amber-50/80 border border-amber-200 rounded-2xl p-4 text-xs text-amber-800">
+                <span class="material-symbols-outlined text-amber-600 shrink-0">security</span>
+                <p class="leading-relaxed">
+                  <strong>Cam kết bảo mật:</strong> Thông tin ngân hàng chỉ dùng cho mục đích xác nhận thanh toán & hoàn tiền đơn hàng. SkinMedi AI tuyệt đối <strong>KHÔNG</strong> lưu trữ mã PIN, CVV hay mật khẩu ngân hàng của quý khách.
+                </p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div 
+                  v-for="bank in bankAccounts" 
+                  :key="bank._id" 
+                  class="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-4 text-xs relative overflow-hidden"
+                  :class="bank.isDefault ? 'border-emerald-600 bg-gradient-to-br from-emerald-50/30 to-white' : 'border-slate-100 bg-white'"
+                >
+                  <div class="space-y-2">
+                    <div class="flex justify-between items-start">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xl">🏦</span>
+                        <span class="font-extrabold text-slate-800 text-sm">{{ bank.bank_name }}</span>
+                      </div>
+                      <span v-if="bank.isDefault" class="bg-emerald-100 text-emerald-800 font-extrabold text-[10px] px-2 py-0.5 rounded-md border border-emerald-200">
+                        Mặc định
+                      </span>
+                    </div>
+
+                    <div class="pt-2 space-y-1">
+                      <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Số tài khoản (Đã che mờ)</p>
+                      <p class="font-mono text-base font-black text-slate-900 tracking-wider">
+                        {{ bank.account_number_masked }}
+                      </p>
+                    </div>
+
+                    <div>
+                      <p class="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Chủ tài khoản</p>
+                      <p class="font-bold text-slate-800 uppercase">{{ bank.account_name }}</p>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between border-t border-slate-100 pt-3">
+                    <button v-if="!bank.isDefault" @click="handleSetDefaultBank(bank._id)" class="text-xs font-bold text-slate-500 hover:text-emerald-700">
+                      Đặt làm mặc định
+                    </button>
+                    <span v-else class="text-[11px] text-emerald-600 font-bold">✓ Tài khoản mặc định</span>
+
+                    <div class="flex gap-2">
+                      <button @click="openEditBankModal(bank)" class="text-xs font-bold text-blue-600 hover:underline">Sửa</button>
+                      <button @click="handleDeleteBank(bank._id)" class="text-xs font-bold text-red-500 hover:underline">Xóa</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="bankAccounts.length === 0" class="col-span-full text-center py-10 text-slate-400 text-xs font-serif italic border border-dashed rounded-2xl">
+                  Chưa có tài khoản ngân hàng nào được liên kết. Vui lòng bấm vào "+ Thêm ngân hàng".
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 4: ĐIỂM SKINMEDI XU -->
+            <div v-if="activeTab === 'points'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-500">stars</span>
+                    <span>Điểm Tích Lũy SkinMedi Xu</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">Tự động tích điểm khi hoàn thành đơn hàng (10.000đ = 1 Xu)</p>
+                </div>
+              </div>
+
+              <!-- Points Balance Summary Card -->
+              <div class="bg-gradient-to-br from-amber-50 via-emerald-50/40 to-white border border-amber-200/60 rounded-3xl p-6 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+                <div class="space-y-1">
+                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Số Dư Xu Hiện Có</span>
+                  <span class="text-3xl font-black text-amber-600 block">⭐ {{ pointsInfo.points }} Xu</span>
+                </div>
+                <div class="space-y-1 border-t sm:border-t-0 sm:border-l border-amber-200/50 pt-3 sm:pt-0">
+                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Điểm Đã Nhận</span>
+                  <span class="text-2xl font-extrabold text-emerald-700 block">+{{ pointsInfo.totalEarned }} Xu</span>
+                </div>
+                <div class="space-y-1 border-t sm:border-t-0 sm:border-l border-amber-200/50 pt-3 sm:pt-0">
+                  <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng Điểm Đã Dùng</span>
+                  <span class="text-2xl font-extrabold text-slate-600 block">-{{ pointsInfo.totalSpent }} Xu</span>
+                </div>
+              </div>
+
+              <!-- Transaction History -->
+              <div class="space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-slate-100 pb-3">
+                  <h4 class="font-extrabold text-sm text-[#064E3B]">📋 Lịch sử giao dịch điểm</h4>
+                  <div class="flex gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold">
+                    <button @click="pointFilter = 'ALL'" class="px-3 py-1 rounded-lg transition-all" :class="pointFilter === 'ALL' ? 'bg-white shadow-xs text-[#064E3B]' : 'text-slate-500'">Tất cả</button>
+                    <button @click="pointFilter = 'EARN'" class="px-3 py-1 rounded-lg transition-all" :class="pointFilter === 'EARN' ? 'bg-white shadow-xs text-emerald-700' : 'text-slate-500'">+ Tích điểm</button>
+                    <button @click="pointFilter = 'SPEND'" class="px-3 py-1 rounded-lg transition-all" :class="pointFilter === 'SPEND' ? 'bg-white shadow-xs text-red-600' : 'text-slate-500'">- Sử dụng</button>
+                  </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-100">
+                      <tr>
+                        <th class="p-3">Thời gian</th>
+                        <th class="p-3">Nội dung</th>
+                        <th class="p-3 text-right">Biến động điểm</th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                      <tr v-for="item in filteredPointHistory" :key="item._id" class="hover:bg-slate-50/60">
+                        <td class="p-3 text-slate-500 whitespace-nowrap">{{ formatDate(item.createdAt) }}</td>
+                        <td class="p-3 font-semibold text-slate-800">{{ item.description }}</td>
+                        <td class="p-3 text-right font-black text-sm" :class="item.amount > 0 ? 'text-emerald-600' : 'text-red-500'">
+                          {{ item.amount > 0 ? `+${item.amount}` : item.amount }} Xu
+                        </td>
+                      </tr>
+                      <tr v-if="filteredPointHistory.length === 0">
+                        <td colspan="3" class="text-center py-8 text-slate-400 italic">Chưa có giao dịch điểm nào.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 5: ĐƠN HÀNG CỦA TÔI -->
+            <div v-if="activeTab === 'orders'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                  <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                    <span class="material-symbols-outlined">shopping_bag</span>
+                    <span>Đơn hàng của tôi</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">Xem và theo dõi danh sách các đơn hàng đã đặt</p>
+                </div>
+              </div>
+
+              <div class="space-y-4">
+                <div 
+                  v-for="order in orders" 
+                  :key="order._id" 
+                  class="p-5 rounded-2xl border border-slate-100 hover:border-emerald-200 transition-all space-y-3 bg-white text-xs"
+                >
+                  <div class="flex flex-wrap justify-between items-center gap-2 border-b border-slate-100 pb-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-black text-slate-800 text-sm">#{{ order.order_code || order._id.slice(-8).toUpperCase() }}</span>
+                      <span class="text-slate-400">•</span>
+                      <span class="text-slate-500">{{ formatDate(order.createdAt || order.order_date) }}</span>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider" :class="order.payment_status === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'">
+                        {{ order.payment_status === 'paid' ? '✓ Đã thanh toán' : 'Chờ thanh toán' }}
+                      </span>
+
+                      <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shadow-2xs" :class="getOrderStatusInfo(order.status).badgeClass">
+                        {{ getOrderStatusInfo(order.status).label }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Return Request Note if exists -->
+                  <div v-if="order.status === 'return_requested' || order.return_reason" class="bg-orange-50/80 border border-orange-200 p-2.5 rounded-xl text-[11px] text-orange-900 flex items-start gap-2">
+                    <span class="material-symbols-outlined text-orange-600 text-base shrink-0">assignment_return</span>
+                    <div>
+                      <p><strong>Yêu cầu hoàn hàng:</strong> {{ order.return_reason || 'Đang chờ xét duyệt' }}</p>
+                      <p v-if="order.return_note" class="text-orange-700 mt-0.5">Mô tả: {{ order.return_note }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Order Note Display if exists -->
+                  <div v-if="order.note" class="bg-amber-50/60 border border-amber-200/50 p-2.5 rounded-xl text-[11px] text-amber-900 flex items-start gap-2">
+                    <span class="material-symbols-outlined text-amber-600 text-base shrink-0">edit_note</span>
+                    <p><strong>Ghi chú đơn hàng:</strong> {{ order.note }}</p>
+                  </div>
+
+                  <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-100/80">
+                    <span class="text-slate-500">Tổng tiền: <strong class="text-slate-900 text-sm font-black">{{ formatPrice(order.total_amount) }}</strong></span>
+                    
+                    <div class="flex items-center gap-2">
+                      <!-- Cancel Button for pending orders -->
+                      <button 
+                        v-if="order.status === 'pending' || order.status === 'confirmed'" 
+                        @click="handleCancelOrder(order)" 
+                        class="btn btn-xs rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold"
+                      >
+                        ✕ Hủy đơn
+                      </button>
+
+                      <!-- Return / Refund Button for delivered/completed orders -->
+                      <button 
+                        v-if="order.status === 'delivered' || order.status === 'completed'" 
+                        @click="openReturnModal(order)" 
+                        class="btn btn-xs rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold border-none shadow-xs flex items-center gap-1"
+                      >
+                        <span class="material-symbols-outlined text-xs">assignment_return</span>
+                        <span>Trả hàng / Hoàn tiền</span>
+                      </button>
+
+                      <button @click="openOrderDetail(order)" class="btn btn-ghost btn-xs text-[#087443] font-bold underline">
+                        Xem chi tiết →
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div v-if="orders.length === 0" class="text-center py-10 text-slate-400 text-xs font-serif italic border border-dashed rounded-2xl">
+                  Bạn chưa có đơn hàng nào.
+                </div>
+              </div>
+            </div>
+
+            <!-- TAB 6: BẢO MẬT TÀI KHOẢN -->
+            <div v-if="activeTab === 'security'" class="bg-white border border-[#EBE7DF] rounded-3xl p-6 md:p-8 shadow-xs space-y-6">
+              <div class="border-b border-slate-100 pb-4">
+                <h3 class="text-lg font-black text-[#064E3B] flex items-center gap-2">
+                  <span class="material-symbols-outlined">shield</span>
+                  <span>Bảo mật tài khoản & Mật khẩu</span>
+                </h3>
+                <p class="text-xs text-slate-500">Đổi mật khẩu định kỳ để bảo vệ tài khoản cá nhân</p>
+              </div>
+
+              <form @submit.prevent="handleChangePassword" class="max-w-md space-y-4">
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu hiện tại <span class="text-red-500">*</span></label>
+                  <input v-model="currentPassword" type="password" class="input input-bordered input-sm w-full rounded-xl" required />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Mật khẩu mới <span class="text-red-500">*</span></label>
+                  <input v-model="newPassword" type="password" class="input input-bordered input-sm w-full rounded-xl" required />
+                </div>
+
+                <div>
+                  <label class="block text-xs font-bold text-slate-600 mb-1">Xác nhận mật khẩu mới <span class="text-red-500">*</span></label>
+                  <input v-model="confirmPassword" type="password" class="input input-bordered input-sm w-full rounded-xl" required />
+                </div>
+
+                <button type="submit" :disabled="isChangingPassword" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl px-6 font-bold text-xs">
+                  <span v-if="isChangingPassword" class="loading loading-spinner loading-xs mr-1"></span>
+                  🔒 Đổi mật khẩu
+                </button>
+              </form>
+            </div>
+
+          </div>
+        </div>
+
       </div>
     </main>
+
+    <!-- ADDRESS MODAL -->
+    <div v-if="showAddressModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-slate-100 text-left relative">
+        <button @click="showAddressModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+        <h3 class="text-lg font-black text-slate-800 mb-4">📍 {{ isEditingAddr ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ giao hàng' }}</h3>
+        
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Họ tên người nhận</label>
+            <input v-model="tempRecipientName" type="text" class="input input-bordered input-sm w-full rounded-xl" />
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Số điện thoại</label>
+            <input v-model="tempPhone" type="text" class="input input-bordered input-sm w-full rounded-xl" />
+          </div>
+
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Tỉnh/Thành</label>
+              <select v-model="tempProvinceCode" @change="onProvinceChange" class="select select-bordered select-sm w-full rounded-xl">
+                <option value="">-- Chọn --</option>
+                <option v-for="p in provinces" :key="p.code" :value="p.code">{{ p.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Quận/Huyện</label>
+              <select v-model="tempDistrictCode" @change="onDistrictChange" class="select select-bordered select-sm w-full rounded-xl">
+                <option value="">-- Chọn --</option>
+                <option v-for="d in districts" :key="d.code" :value="d.code">{{ d.name }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-600 mb-1">Phường/Xã</label>
+              <select v-model="tempWardCode" class="select select-bordered select-sm w-full rounded-xl">
+                <option value="">-- Chọn --</option>
+                <option v-for="w in wards" :key="w.code" :value="w.code">{{ w.name }}</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Địa chỉ chi tiết (Số nhà, tên đường...)</label>
+            <input v-model="tempAddressDetail" type="text" class="input input-bordered input-sm w-full rounded-xl" />
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <input v-model="tempIsDefault" type="checkbox" id="addrDef" class="checkbox checkbox-xs checkbox-success" />
+            <label for="addrDef" class="font-bold text-slate-700 cursor-pointer">Đặt làm địa chỉ giao hàng mặc định</label>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <button @click="showAddressModal = false" class="btn btn-ghost btn-sm rounded-xl">Hủy</button>
+          <button @click="saveAddress" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl px-6 font-bold">Lưu địa chỉ</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANK ACCOUNT MODAL -->
+    <div v-if="showBankModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-slate-100 text-left relative">
+        <button @click="showBankModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+        <h3 class="text-lg font-black text-slate-800 mb-4">🏦 {{ isEditingBank ? 'Cập nhật tài khoản ngân hàng' : 'Thêm tài khoản ngân hàng' }}</h3>
+        
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Chọn Ngân hàng</label>
+            <select v-model="tempBankName" class="select select-bordered select-sm w-full rounded-xl">
+              <option v-for="b in popularBanks" :key="b" :value="b">{{ b }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Tên chủ tài khoản (Viết hoa không dấu)</label>
+            <input v-model="tempAccountName" type="text" placeholder="NGUYEN VAN A" class="input input-bordered input-sm w-full rounded-xl uppercase font-bold" />
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-600 mb-1">Số tài khoản ngân hàng</label>
+            <input v-model="tempAccountNumber" type="text" placeholder="0382888666" class="input input-bordered input-sm w-full rounded-xl font-mono" />
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <input v-model="tempBankIsDefault" type="checkbox" id="bankDef" class="checkbox checkbox-xs checkbox-success" />
+            <label for="bankDef" class="font-bold text-slate-700 cursor-pointer">Đặt làm ngân hàng nhận hoàn tiền mặc định</label>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-4">
+          <button @click="showBankModal = false" class="btn btn-ghost btn-sm rounded-xl">Hủy</button>
+          <button @click="saveBankAccount" class="btn bg-[#087443] hover:bg-[#064E3B] text-white btn-sm rounded-xl px-6 font-bold">Lưu ngân hàng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ORDER DETAIL MODAL -->
+    <div v-if="showOrderDetailModal && selectedOrder" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div class="bg-white rounded-3xl w-full max-w-xl p-6 shadow-2xl border border-slate-100 text-left relative max-h-[90vh] flex flex-col">
+        <!-- Modal Header -->
+        <div class="flex items-start justify-between pb-3 border-b border-slate-100 shrink-0">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h3 class="text-lg font-black text-slate-800">🛍 Chi tiết đơn hàng #{{ selectedOrder.order_code || selectedOrder._id.slice(-8).toUpperCase() }}</h3>
+              <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border shadow-2xs" :class="getOrderStatusInfo(selectedOrder.status).badgeClass">
+                {{ getOrderStatusInfo(selectedOrder.status).label }}
+              </span>
+            </div>
+            <p class="text-xs text-slate-400">Ngày đặt: {{ formatDate(selectedOrder.createdAt || selectedOrder.order_date) }}</p>
+          </div>
+          <button @click="showOrderDetailModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">✕</button>
+        </div>
+
+        <!-- Modal Body Scrollable -->
+        <div class="space-y-4 text-xs overflow-y-auto py-3 flex-grow pr-1">
+          <!-- Product List -->
+          <div>
+            <h4 class="font-bold text-slate-700 mb-2 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-emerald-600">shopping_bag</span>
+              <span>Danh sách sản phẩm ({{ (selectedOrder.items && selectedOrder.items.length) || 1 }} món)</span>
+            </h4>
+            <div class="space-y-2">
+              <div v-for="(item, idx) in (selectedOrder.items || [selectedOrder])" :key="item._id || idx" class="flex items-center justify-between p-3 bg-slate-50 border border-slate-100 rounded-2xl gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img :src="item.product_id?.image || selectedOrder.product_id?.image || 'https://placehold.co/80x80?text=SP'" class="w-12 h-12 rounded-xl object-cover border border-slate-200 shrink-0 bg-white" alt="Ảnh sản phẩm" />
+                  <div class="min-w-0">
+                    <p class="font-bold text-slate-800 truncate text-xs">{{ item.product_id?.title || selectedOrder.product_id?.title || 'Sản phẩm' }}</p>
+                    <p class="text-[11px] text-slate-500 mt-0.5">Số lượng: <strong class="text-slate-700">{{ item.quantity || selectedOrder.quantity || 1 }}</strong></p>
+                  </div>
+                </div>
+                <div class="text-right shrink-0">
+                  <p class="font-extrabold text-emerald-700 text-xs">{{ formatPrice((item.price_at_purchase || selectedOrder.price_at_purchase || item.price || 0) * (item.quantity || selectedOrder.quantity || 1)) }}</p>
+                  <p v-if="(item.quantity || selectedOrder.quantity || 1) > 1" class="text-[10px] text-slate-400">{{ formatPrice(item.price_at_purchase || selectedOrder.price_at_purchase || item.price || 0) }}/món</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Info -->
+          <div class="bg-slate-50 p-3.5 rounded-2xl space-y-1.5 border border-slate-100">
+            <p class="font-bold text-slate-700 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-emerald-600">local_shipping</span>
+              <span>Thông tin nhận hàng</span>
+            </p>
+            <p class="text-slate-600">Người nhận: <strong class="text-slate-800">{{ selectedOrder.user_id?.first_name ? `${selectedOrder.user_id.first_name} ${selectedOrder.user_id.last_name || ''}` : (selectedOrder.phone_number || 'Khách hàng') }}</strong> (SĐT: {{ selectedOrder.phone_number }})</p>
+            <p class="text-slate-600">Địa chỉ nhận: {{ formatAddress(selectedOrder.shipping_address) }}</p>
+          </div>
+
+          <!-- Tracking History if available -->
+          <div v-if="selectedOrder.tracking_history && selectedOrder.tracking_history.length > 0" class="bg-blue-50/70 p-3.5 rounded-2xl border border-blue-100 space-y-2">
+            <p class="font-bold text-blue-900 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-base text-blue-600">timeline</span>
+              <span>Hành trình đơn hàng {{ selectedOrder.tracking_number ? `(${selectedOrder.tracking_number})` : '' }}</span>
+            </p>
+            <div class="space-y-2 pl-2 border-l-2 border-blue-200">
+              <div v-for="(track, tIdx) in [...selectedOrder.tracking_history].sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))" :key="tIdx" class="relative pl-3">
+                <div class="absolute -left-[11px] top-1 w-2.5 h-2.5 rounded-full bg-blue-500 ring-2 ring-white"></div>
+                <p class="font-bold text-blue-900 text-[11px]">{{ track.description || track.status }}</p>
+                <p class="text-[10px] text-blue-600/80">{{ formatDate(track.timestamp) }} <span v-if="track.location">• {{ track.location }}</span></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Note -->
+          <div v-if="selectedOrder.note" class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200/60 text-amber-900">
+            <p class="font-bold flex items-center gap-1">
+              <span class="material-symbols-outlined text-sm">edit_note</span>
+              <span>Ghi chú đơn hàng:</span>
+            </p>
+            <p class="mt-0.5">{{ selectedOrder.note }}</p>
+          </div>
+
+          <!-- Payment & Shipping Details -->
+          <div class="space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <div class="flex justify-between items-center text-slate-700">
+              <span>Phương thức thanh toán:</span>
+              <strong class="text-emerald-700">{{ selectedOrder.payment_method }} ({{ selectedOrder.payment_status === 'paid' ? 'Đã thanh toán' : 'Chờ thanh toán' }})</strong>
+            </div>
+            <div class="flex justify-between items-center text-slate-700">
+              <span>Phương thức vận chuyển:</span>
+              <strong class="text-slate-800 uppercase">{{ selectedOrder.shipping_method }}</strong>
+            </div>
+            <div class="flex justify-between items-center text-slate-700">
+              <span>Phí vận chuyển:</span>
+              <span>{{ formatPrice(selectedOrder.shipping_fee) }}</span>
+            </div>
+            <div class="border-t border-slate-200 pt-2 mt-2 flex justify-between items-center font-black text-sm">
+              <span class="text-slate-800">Tổng thanh toán:</span>
+              <span class="text-emerald-700 text-base">{{ formatPrice(selectedOrder.total_amount) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-slate-100 shrink-0">
+          <div class="flex items-center gap-2">
+            <button 
+              v-if="selectedOrder.status === 'delivered' || selectedOrder.status === 'completed'" 
+              @click="openReturnModal(selectedOrder); showOrderDetailModal = false;" 
+              class="btn btn-sm rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold border-none text-xs flex items-center gap-1 shadow-xs"
+            >
+              <span class="material-symbols-outlined text-sm">assignment_return</span>
+              <span>Yêu cầu Trả hàng / Hoàn tiền</span>
+            </button>
+            <button 
+              v-if="selectedOrder.status === 'pending' || selectedOrder.status === 'confirmed'" 
+              @click="handleCancelOrder(selectedOrder); showOrderDetailModal = false;" 
+              class="btn btn-sm rounded-xl border border-red-200 text-red-600 hover:bg-red-50 font-bold text-xs"
+            >
+              ✕ Hủy đơn hàng
+            </button>
+          </div>
+
+          <button @click="showOrderDetailModal = false" class="btn btn-ghost btn-sm rounded-xl font-bold text-slate-600 hover:bg-slate-100">Đóng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RETURN / REFUND REQUEST MODAL -->
+    <div v-if="showReturnModal && orderToReturn" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+      <div class="bg-white rounded-3xl w-full max-w-lg p-6 shadow-2xl border border-slate-100 text-left relative">
+        <button @click="showReturnModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl font-bold">✕</button>
+        
+        <div class="flex items-center gap-2 mb-3">
+          <span class="material-symbols-outlined text-2xl text-amber-500">assignment_return</span>
+          <h3 class="text-lg font-black text-slate-800">Yêu cầu Trả hàng / Hoàn tiền</h3>
+        </div>
+
+        <div class="bg-amber-50/80 border border-amber-200/80 p-3.5 rounded-2xl mb-4 text-xs text-amber-900 leading-relaxed">
+          <p><strong>Đơn hàng:</strong> #{{ orderToReturn.order_code || orderToReturn._id.slice(-8).toUpperCase() }} — Tổng tiền: <strong>{{ formatPrice(orderToReturn.total_amount) }}</strong></p>
+          <p class="text-[11px] text-amber-700 mt-1">Chính sách: Khách hàng được đổi trả trong 7 ngày nếu sản phẩm lỗi, giao sai hoặc gặp kích ứng y tế.</p>
+        </div>
+
+        <form @submit.prevent="submitReturnRequest" class="space-y-4 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5">Lý do yêu cầu trả hàng <span class="text-red-500">*</span></label>
+            <select v-model="returnReason" class="select select-bordered select-sm w-full rounded-xl" required>
+              <option v-for="r in returnReasonOptions" :key="r" :value="r">{{ r }}</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5">Mô tả chi tiết tình trạng sản phẩm</label>
+            <textarea 
+              v-model="returnNote" 
+              rows="3" 
+              placeholder="Vui lòng mô tả chi tiết lý do (Ví dụ: Sản phẩm bị nứt nắp, serum đổi màu, da bị châm chích mẩn đỏ sau khi dùng...)"
+              class="textarea textarea-bordered textarea-sm w-full rounded-xl"
+            ></textarea>
+          </div>
+
+          <!-- Bank Account for refund notice -->
+          <div class="bg-slate-50 border border-slate-200/60 p-3 rounded-2xl space-y-1">
+            <p class="font-bold text-slate-700 flex items-center gap-1">
+              <span>🏦 Tài khoản nhận tiền hoàn:</span>
+            </p>
+            <p v-if="defaultBank" class="text-emerald-700 font-bold">
+              {{ defaultBank.bank_name }} - {{ defaultBank.account_number_masked }} ({{ defaultBank.account_name }})
+            </p>
+            <p v-else class="text-slate-500 italic">
+              Tiền hoàn sẽ được chuyển qua STK ngân hàng hoặc cộng vào SkinMedi Xu sau khi kiểm duyệt.
+            </p>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <button type="button" @click="showReturnModal = false" class="btn btn-ghost btn-sm rounded-xl">Hủy bỏ</button>
+            <button 
+              type="submit" 
+              :disabled="isSubmittingReturn" 
+              class="btn bg-amber-500 hover:bg-amber-600 text-white btn-sm rounded-xl px-6 font-bold"
+            >
+              <span v-if="isSubmittingReturn" class="loading loading-spinner loading-xs mr-1"></span>
+              Xác nhận gửi yêu cầu
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     <Footer />
   </div>
 </template>
-
-<style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-
-.up-page {
-  min-height: 100vh;
-  background: #f0fdf4; /* Mint white background */
-  color: #334155;
-  font-family: 'Inter', sans-serif;
-  display: flex;
-  flex-direction: column;
-}
-
-.up-main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  padding: 2.5rem 1rem 4rem;
-}
-
-.up-container {
-  width: 100%;
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-/* ─── Alert ─── */
-.up-alert {
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.35);
-  border-radius: 1rem;
-  padding: 1.25rem 1.5rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  color: #f87171;
-}
-
-/* ─── Profile Card ─── */
-.up-card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(13,148,136,0.06);
-}
-
-/* ─── Profile Header ─── */
-.up-header {
-  padding: 2.5rem 2rem;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 2rem;
-}
-
-.up-avatar-wrap {
-  flex-shrink: 0;
-}
-
-.up-avatar {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #1a1a1a;
-  border: 2px solid #0d9488;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.up-avatar-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.up-avatar-placeholder {
-  font-size: 3rem;
-  font-weight: 800;
-  color: #3f3f46;
-  text-transform: uppercase;
-}
-
-.up-info {
-  flex: 1;
-  min-width: 200px;
-}
-
-.up-name {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #0f172a;
-  letter-spacing: -0.03em;
-  margin: 0;
-}
-
-.up-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 0.75rem;
-}
-
-.up-tag {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.25rem 0.75rem;
-  border-radius: 50px;
-}
-
-.up-tag--username {
-  background: rgba(15,23,42,0.05);
-  color: #475569;
-  border: 1px solid rgba(15,23,42,0.1);
-}
-
-.up-tag--points {
-  background: rgba(13,148,136,0.15);
-  color: #2dd4bf;
-  border: 1px solid rgba(13,148,136,0.3);
-}
-
-.up-actions {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.up-btn {
-  padding: 0.65rem 1.25rem;
-  border-radius: 50px;
-  font-size: 0.875rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-  border: none;
-}
-
-.up-btn--primary {
-  background: linear-gradient(135deg, #0d9488, #0f766e);
-  color: white;
-  box-shadow: 0 4px 12px rgba(13,148,136,0.25);
-}
-
-.up-btn--primary:hover {
-  background: linear-gradient(135deg, #14b8a6, #0d9488);
-  transform: scale(1.02);
-}
-
-.up-btn--secondary {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
-  color: #475569;
-}
-
-.up-btn--secondary:hover {
-  background: #f1f5f9;
-  border-color: #cbd5e1;
-}
-
-/* ─── Profile Tabs ─── */
-.up-tabs {
-  display: flex;
-  background: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0 1rem;
-}
-
-.up-tab {
-  background: transparent;
-  border: none;
-  color: #64748b;
-  font-size: 0.95rem;
-  font-weight: 700;
-  padding: 1rem 1.5rem;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.15s;
-}
-
-.up-tab:hover {
-  color: #0f172a;
-}
-
-.up-tab--active {
-  color: #2dd4bf;
-}
-
-.up-tab--active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 1.5rem;
-  right: 1.5rem;
-  height: 2px;
-  background: #2dd4bf;
-  border-radius: 2px;
-}
-
-/* ─── Content ─── */
-.up-content {
-  padding: 2.5rem 2rem;
-}
-
-/* Tab Content: Info */
-.up-info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2.5rem;
-}
-
-.up-info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
-
-.up-info-label {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.up-info-value {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.up-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.15rem 0.6rem;
-  border-radius: 4px;
-}
-
-.up-badge--male {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.3);
-}
-
-.up-badge--female {
-  background: rgba(244, 114, 182, 0.15);
-  color: #f472b6;
-  border: 1px solid rgba(244, 114, 182, 0.3);
-}
-
-/* Tab Content: History */
-.up-empty {
-  text-align: center;
-  padding: 4rem 1rem;
-  color: #52525b;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.up-table-wrap {
-  overflow-x: auto;
-}
-
-.up-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.up-table th {
-  padding: 1rem;
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.up-table td {
-  padding: 1.25rem 1rem;
-  color: #475569;
-  font-size: 0.95rem;
-  border-bottom: 1px solid #f1f5f9;
-}
-
-.up-status-badge {
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-}
-
-.up-status-badge--warning {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-}
-
-.up-status-badge--info {
-  background: rgba(14, 165, 233, 0.15);
-  color: #38bdf8;
-}
-
-.up-status-badge--success {
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-}
-
-.up-status-badge--danger {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-}
-
-.up-renew-btn {
-  background: transparent;
-  border: 1px solid #27272a;
-  color: #2dd4bf;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.up-renew-btn:hover {
-  background: rgba(45,212,191,0.08);
-  border-color: #0d9488;
-}
-
-/* Tab Content: Reviews */
-.up-reviews-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-}
-
-.up-review-card {
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  border-radius: 1rem;
-  padding: 1.5rem;
-}
-
-.up-review-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.up-review-prod {
-  display: block;
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: #0d9488;
-  margin-bottom: 0.25rem;
-}
-
-.up-stars {
-  display: flex;
-  gap: 0.1rem;
-}
-
-.up-review-comment {
-  font-size: 0.9rem;
-  color: #334155;
-  font-style: italic;
-  line-height: 1.5;
-}
-
-.up-review-reply {
-  margin-top: 1rem;
-  padding: 1rem;
-  background: rgba(13,148,136,0.05);
-  border-left: 3px solid #0d9488;
-  border-radius: 4px;
-}
-
-.up-reply-label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: #0f766e;
-  text-transform: uppercase;
-  margin-bottom: 0.25rem;
-}
-
-.up-reply-text {
-  font-size: 0.85rem;
-  color: #475569;
-  margin: 0;
-}
-
-@media (max-width: 768px) {
-  .up-header {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem 1.5rem;
-  }
-  .up-info-grid {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-  .up-reviews-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

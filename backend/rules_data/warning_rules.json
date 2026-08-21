@@ -1,0 +1,42 @@
+[
+  {
+    "disease_id": "KB_010",
+    "warning_code": "MALIGNANT_BCC_ALERT",
+    "warning_title": "🚨 Cảnh báo Ung thư tế bào đáy (BCC)",
+    "warning_message": "AI nhận diện tổn thương có nguy cơ là Ung thư tế bào đáy (BCC). Đây là bệnh lý da liễu cần phẫu thuật y khoa. Hệ thống KHÔNG gợi ý bất kỳ sản phẩm mỹ phẩm nào.",
+    "action_required": "EMERGENCY_HOSPITAL",
+    "is_blocking": true
+  },
+  {
+    "disease_id": "KB_011",
+    "warning_code": "MALIGNANT_MELANOMA_ALERT",
+    "warning_title": "🚨 Cảnh báo Khẩn cấp Ung thư hắc tố (Melanoma)",
+    "warning_message": "AI nhận diện tổn thương có nguy cơ cao là Ung thư hắc tố (Melanoma). Đây là bệnh nguy hiểm tính mạng. Tuyệt đối KHÔNG tự bôi thuốc hay thẩm mỹ. Cần đến Bệnh viện Chuyên khoa Ung Bướu / Da Liễu Trung Ương để sinh thiết gấp!",
+    "action_required": "EMERGENCY_HOSPITAL",
+    "is_blocking": true
+  },
+  {
+    "disease_id": "KB_016",
+    "warning_code": "PRECANCOUROUS_AK_ALERT",
+    "warning_title": "⚠️ Cảnh báo Tổn thương Tiền Ung thư da (Actinic Keratosis)",
+    "warning_message": "Tổn thương Dày sừng quang hóa có 5-10% nguy cơ tiến triển thành Ung thư tế bào vẩy (SCC). Cần đi khám bác sĩ để áp lạnh Nitơ hoặc bôi thuốc kê đơn Efudex.",
+    "action_required": "DOCTOR_CONSULT",
+    "is_blocking": true
+  },
+  {
+    "disease_id": "KB_012",
+    "warning_code": "ANTIFUNGAL_REQUIRED_ALERT",
+    "warning_title": "⚠️ Lưu ý Điều trị Nấm da / Hắc lao",
+    "warning_message": "Phương pháp điều trị chính của bệnh Nấm da / Hắc lao là THUỐC CHỐNG NẤM ĐẶC TRỊ theo chỉ định của Bác sĩ hoặc Dược sĩ. Mỹ phẩm chỉ đóng vai trò hỗ trợ làm sạch dịu nhẹ.",
+    "action_required": "PHARMACIST_CONSULT",
+    "is_blocking": false
+  },
+  {
+    "disease_id": "KB_017",
+    "warning_code": "CHICKENPOX_ASPIRIN_WARNING",
+    "warning_title": "⛔ CẤM DÙNG ASPIRIN HẠ SỐT CHO THỦY ĐẬU",
+    "warning_message": "Tuyệt đối không dùng Aspirin hạ sốt cho trẻ bị thủy đậu vì có thể gây Hội chứng Reye tử vong 50%. Chỉ dùng Paracetamol.",
+    "action_required": "STRICT_MEDICATION_SAFETY",
+    "is_blocking": false
+  }
+]

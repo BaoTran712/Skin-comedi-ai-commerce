@@ -1,0 +1,329 @@
+// =============================================================================
+// Prisma Schema: Skin Disease AI E-Commerce & Medical Rule Engine (CDSS)
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// 1. Core E-Commerce & AI Product Models
+// -----------------------------------------------------------------------------
+
+model Product {
+  id                            String                  @id @default(uuid())
+  title                         String
+  name                          String
+  slug                          String                  @unique
+  price                         Float
+  quantity                      Int                     @default(0)
+  expiryDate                    String                  @default("12/2027") @map("expiry_date")
+  brandId                       String?                 @map("brand_id")
+  brand                         String?                 @default("")
+  categoryId                    String?                 @map("category_id")
+  category                      String?                 @default("")
+  description                   String?                 @default("")
+  image                         String?                 @default("")
+
+  // Medical & AI Recommendation Attributes
+  mainIngredients               String[]                @map("main_ingredients")
+  ingredientTags                String[]                @map("ingredient_tags")
+  skinTypeTags                  String[]                @map("skin_type_tags")
+  skinConditionsSupported       String[]                @map("skin_conditions_supported")
+  skinConditionsNotSupported    String[]                @map("skin_conditions_not_supported")
+
+  // Usage & Protocol
+  usage                         String?                 @default("")
+  morningUse                    Boolean                 @default(true) @map("morning_use")
+  nightUse                      Boolean                 @default(true) @map("night_use")
+  requiresSunscreen             Boolean                 @default(false) @map("requires_sunscreen")
+  usageSteps                    String?                 @default("") @map("usage_steps")
+  usageFrequency                String?                 @default("1 lần / ngày") @map("usage_frequency")
+
+  // Safety & Age Suitability
+  pregnancySafe                 Boolean                 @default(true) @map("pregnancy_safe")
+  childrenSafe                  Boolean                 @default(false) @map("children_safe")
+  recommendedAge                String?                 @default("12+") @map("recommended_age")
+  contraindications             String?                 @default("")
+  medicalWarning                String?                 @default("") @map("medical_warning")
+
+  // Formulas & Interactivity
+  compatibleIngredients         String[]                @map("compatible_ingredients")
+  incompatibleIngredients       String[]                @map("incompatible_ingredients")
+  benefits                      String[]
+
+  // Formula Attributes
+  oilFree                       Boolean                 @default(false) @map("oil_free")
+  fragranceFree                 Boolean                 @default(true) @map("fragrance_free")
+  alcoholFree                   Boolean                 @default(true) @map("alcohol_free")
+  parabenFree                   Boolean                 @default(true) @map("paraben_free")
+  comedogenicLevel              Int                     @default(0) @map("comedogenic_level")
+  texture                       String?                 @default("Serum")
+  productType                   String?                 @default("Treatment") @map("product_type")
+
+  // AI Priority & Recommendations
+  aiPriorityScore               Int                     @default(50) @map("ai_priority_score")
+  aiRecommendationReason        String?                 @default("") @map("ai_recommendation_reason")
+
+  // E-Commerce Extensions
+  flashSalePrice                Float?                  @map("flash_sale_price")
+  flashSaleEndTime              DateTime?               @map("flash_sale_end_time")
+  hasVariants                   Boolean                 @default(false) @map("has_variants")
+  prescriptionRequired          Boolean                 @default(false) @map("prescription_required")
+  originCountry                 String?                 @default("Việt Nam") @map("origin_country")
+
+  createdAt                     DateTime                @default(now()) @map("created_at")
+  updatedAt                     DateTime                @updatedAt @map("updated_at")
+
+  diseaseMappings               DiseaseProductMapping[]
+  diseaseProductRules           DiseaseProductRule[]
+  productRules                  ProductRule[]
+
+  @@map("products")
+}
+
+model Ingredient {
+  id                  String              @id @default(uuid())
+  name                String              @unique
+  description         String?             @default("")
+  benefits            String[]
+  mechanism           String?             @default("")
+  recommendedFor      String[]            @map("recommended_for")
+  avoidFor            String[]            @map("avoid_for")
+  compatibleWith      String[]            @map("compatible_with")
+  notCompatibleWith   String[]            @map("not_compatible_with")
+
+  createdAt           DateTime            @default(now()) @map("created_at")
+  updatedAt           DateTime            @updatedAt @map("updated_at")
+
+  diseaseIngredients  DiseaseIngredient[]
+  ingredientRules     IngredientRule[]
+
+  @@map("ingredients")
+}
+
+model DiseaseProductMapping {
+  id                String    @id @default(uuid())
+  diseaseId         String    @map("disease_id")
+  productId         String    @map("product_id")
+  priority          Int       @default(50)
+  reason            String
+  recommendedStage  String?   @default("All Stages") @map("recommended_stage")
+  morning           Boolean   @default(true)
+  night             Boolean   @default(true)
+  confidence        Float     @default(0.90)
+
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @updatedAt @map("updated_at")
+
+  product           Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([diseaseId, priority])
+  @@map("disease_product_mappings")
+}
+
+model DiseaseIngredient {
+  id              String      @id @default(uuid())
+  diseaseId       String      @map("disease_id")
+  ingredientId    String      @map("ingredient_id")
+  ingredientName  String      @map("ingredient_name")
+  priority        Int         @default(50)
+  recommended     Boolean     @default(true)
+  avoid           Boolean     @default(false)
+
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  ingredient      Ingredient  @relation(fields: [ingredientId], references: [id], onDelete: Cascade)
+
+  @@index([diseaseId, priority])
+  @@map("disease_ingredients")
+}
+
+// -----------------------------------------------------------------------------
+// 2. Medical Rule Engine (CDSS) Models
+// -----------------------------------------------------------------------------
+
+model MedicalRule {
+  id                           String   @id @default(uuid())
+  diseaseId                    String   @unique @map("disease_id")
+  diseaseName                  String   @map("disease_name")
+  severity                     String   // LOW, MEDIUM, HIGH, EMERGENCY
+  emergencyLevel               String   @map("emergency_level") // NONE, LOW, MEDIUM, HIGH, CRITICAL
+  needDoctor                   Boolean  @map("need_doctor")
+  needEmergency                Boolean  @map("need_emergency")
+  needMedicalWarning           Boolean  @map("need_medical_warning")
+  allowProductRecommendation   Boolean  @map("allow_product_recommendation")
+  allowChatbotAdvice           Boolean  @map("allow_chatbot_advice")
+  allowSkincareRoutine         Boolean  @map("allow_skincare_routine")
+  allowIngredientRecommendation Boolean @map("allow_ingredient_recommendation")
+  needAiDisclaimer             Boolean  @map("need_ai_disclaimer")
+
+  createdAt                    DateTime @default(now()) @map("created_at")
+  updatedAt                    DateTime @updatedAt @map("updated_at")
+
+  diseaseRule                  DiseaseRule?
+  recommendationRule           RecommendationRule?
+  warningRules                 WarningRule[]
+
+  @@map("medical_rules")
+}
+
+model DiseaseRule {
+  id                         String      @id @default(uuid())
+  diseaseId                  String      @unique @map("disease_id")
+  recommendedIngredients     String[]    @map("recommended_ingredients")
+  forbiddenIngredients       String[]    @map("forbidden_ingredients")
+  recommendedProductTypes    String[]    @map("recommended_product_types")
+  forbiddenProductTypes      String[]    @map("forbidden_product_types")
+  morningRoutine             String      @map("morning_routine")
+  nightRoutine               String      @map("night_routine")
+  medicalWarning             String      @map("medical_warning")
+  emergencyMessage           String      @map("emergency_message")
+  lifestyleAdvice            String[]    @map("lifestyle_advice")
+  foodAdvice                 String[]    @map("food_advice")
+  sunProtectionRequirement   String      @map("sun_protection_requirement")
+  pregnancyWarning           String      @map("pregnancy_warning")
+  childrenWarning            String      @map("children_warning")
+
+  createdAt                  DateTime    @default(now()) @map("created_at")
+  updatedAt                  DateTime    @updatedAt @map("updated_at")
+
+  medicalRule                MedicalRule @relation(fields: [diseaseId], references: [diseaseId], onDelete: Cascade)
+
+  @@map("disease_rules")
+}
+
+model IngredientRule {
+  id                         String      @id @default(uuid())
+  ingredientId               String?     @map("ingredient_id")
+  ingredientName             String      @unique @map("ingredient_name")
+  description                String      @default("")
+  benefits                   String[]
+  recommendedDiseases        String[]    @map("recommended_diseases")
+  forbiddenDiseases          String[]    @map("forbidden_diseases")
+  compatibleIngredients      String[]    @map("compatible_ingredients")
+  incompatibleIngredients    String[]    @map("incompatible_ingredients")
+  pregnancySafe              Boolean     @default(true) @map("pregnancy_safe")
+  childrenSafe               Boolean     @default(false) @map("children_safe")
+  morningUse                 Boolean     @default(true) @map("morning_use")
+  nightUse                   Boolean     @default(true) @map("night_use")
+  needSunscreen              Boolean     @default(false) @map("need_sunscreen")
+  irritationRisk             String      @default("LOW") @map("irritation_risk") // LOW, MEDIUM, HIGH
+
+  createdAt                  DateTime    @default(now()) @map("created_at")
+  updatedAt                  DateTime    @updatedAt @map("updated_at")
+
+  ingredientRef              Ingredient? @relation(fields: [ingredientId], references: [id], onDelete: SetNull)
+
+  @@map("ingredient_rules")
+}
+
+model ProductRule {
+  id                         String      @id @default(uuid())
+  productId                  String      @map("product_id")
+  recommendedDiseases        String[]    @map("recommended_diseases")
+  contraindicatedDiseases    String[]    @map("contraindicated_diseases")
+  ingredientTags             String[]    @map("ingredient_tags")
+  skinTypeTags               String[]    @map("skin_type_tags")
+  morningUse                 Boolean     @default(true) @map("morning_use")
+  nightUse                   Boolean     @default(true) @map("night_use")
+  requiresSunscreen          Boolean     @default(false) @map("requires_sunscreen")
+  pregnancySafe              Boolean     @default(true) @map("pregnancy_safe")
+  childrenSafe               Boolean     @default(false) @map("children_safe")
+  priorityScore              Int         @default(50) @map("priority_score")
+  recommendationReason       String      @map("recommendation_reason")
+  warningMessage             String      @default("") @map("warning_message")
+
+  createdAt                  DateTime    @default(now()) @map("created_at")
+  updatedAt                  DateTime    @updatedAt @map("updated_at")
+
+  product                    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_rules")
+}
+
+model WarningRule {
+  id                         String      @id @default(uuid())
+  diseaseId                  String      @map("disease_id")
+  warningCode                String      @map("warning_code") // e.g., "MALIGNANT_ALERT", "ANTIFUNGAL_REQUIRED"
+  warningTitle               String      @map("warning_title")
+  warningMessage             String      @map("warning_message")
+  actionRequired             String      @map("action_required") // "EMERGENCY_HOSPITAL", "PHARMACIST_CONSULT", "GENERAL_DISCLAIMER"
+  isBlocking                 Boolean     @default(false) @map("is_blocking")
+
+  createdAt                  DateTime    @default(now()) @map("created_at")
+  updatedAt                  DateTime    @updatedAt @map("updated_at")
+
+  medicalRule                MedicalRule @relation(fields: [diseaseId], references: [diseaseId], onDelete: Cascade)
+
+  @@map("warning_rules")
+}
+
+model RecommendationRule {
+  id                         String      @id @default(uuid())
+  diseaseId                  String      @unique @map("disease_id")
+  preferredIngredients       String[]    @map("preferred_ingredients")
+  hiddenIngredients          String[]    @map("hidden_ingredients")
+  preferredProductTypes      String[]    @map("preferred_product_types")
+  hiddenProductTypes         String[]    @map("hidden_product_types")
+  minSafetyScore             Int         @default(60) @map("min_safety_score")
+
+  createdAt                  DateTime    @default(now()) @map("created_at")
+  updatedAt                  DateTime    @updatedAt @map("updated_at")
+
+  medicalRule                MedicalRule @relation(fields: [diseaseId], references: [diseaseId], onDelete: Cascade)
+
+  @@map("recommendation_rules")
+}
+
+model IngredientConflictRule {
+  id                         String   @id @default(uuid())
+  ingredientA                String   @map("ingredient_a")
+  ingredientB                String   @map("ingredient_b")
+  conflictSeverity           String   @map("conflict_severity") // LOW, MEDIUM, SEVERE
+  reason                     String
+  recommendation             String   // e.g. "Dùng cách ngày", "Không dùng chung routine"
+
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  @@unique([ingredientA, ingredientB])
+  @@map("ingredient_conflict_rules")
+}
+
+model DiseaseProductRule {
+  id                         String   @id @default(uuid())
+  diseaseId                  String   @map("disease_id")
+  productId                  String   @map("product_id")
+  suitabilityScore           Int      @default(50) @map("suitability_score")
+  clinicalRationale          String   @map("clinical_rationale")
+
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  product                    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([diseaseId, productId])
+  @@map("disease_product_rules")
+}
+
+model DiseaseIngredientRule {
+  id                         String   @id @default(uuid())
+  diseaseId                  String   @map("disease_id")
+  ingredientName             String   @map("ingredient_name")
+  isRecommended              Boolean  @default(true) @map("is_recommended")
+  isForbidden                Boolean  @default(false) @map("is_forbidden")
+  priority                   Int      @default(50)
+
+  createdAt                  DateTime @default(now()) @map("created_at")
+  updatedAt                  DateTime @updatedAt @map("updated_at")
+
+  @@unique([diseaseId, ingredientName])
+  @@map("disease_ingredient_rules")
+}

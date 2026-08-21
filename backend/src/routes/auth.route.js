@@ -9,6 +9,13 @@ const router = express.Router();
 
 const generateTokenAndRedirect = (req, res) => {
     const user = req.user;
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+    
+    // Kiểm tra tài khoản có bị khóa/ngừng hoạt động không trước khi tạo token
+    if (user.status && user.status !== "ACTIVE") {
+        return res.redirect(`${frontendUrl}/user/login?error=${encodeURIComponent("Tài khoản của bạn đã bị khóa hoặc ngừng hoạt động.")}`);
+    }
+
     const token = jwt.sign(
         { id: user._id, username: user.username || user.email, role: user.role },
         process.env.JWT_SECRET,
@@ -23,7 +30,6 @@ const generateTokenAndRedirect = (req, res) => {
         avatar: user.avatar
     }));
 
-    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     res.redirect(`${frontendUrl}/auth/callback?token=${token}&user=${userObj}`);
 };
 

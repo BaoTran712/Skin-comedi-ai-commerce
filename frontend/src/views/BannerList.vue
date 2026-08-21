@@ -91,8 +91,8 @@ const deleteBanner = async (id) => {
 };
 
 onMounted(() => {
-  const role = localStorage.getItem("role");
-  if (role !== "staff") {
+  const role = (localStorage.getItem("role") || "").toUpperCase();
+  if (role !== "STAFF" && role !== "ADMIN") {
     router.push("/");
     return;
   }

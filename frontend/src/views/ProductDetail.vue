@@ -10,6 +10,7 @@ import ReviewService from '../services/review.service';
 import SettingService from '../services/setting.service';
 import VariantService from '../services/variant.service';
 import DiagnosisService from '../services/diagnosis.service';
+import WishlistService from '../services/wishlist.service';
 import { push } from 'notivue';
 
 const route = useRoute();
@@ -25,6 +26,41 @@ const product = ref({});
 const reviews = ref([]);
 const similarProducts = ref([]);
 const loading = ref(true);
+
+const isFavorite = ref(false);
+
+const fetchWishlistStatus = async () => {
+  if (username.value && role.value !== 'staff') {
+    try {
+      const wishlist = await WishlistService.getWishlist();
+      isFavorite.value = wishlist.products.some(p => p._id === productId.value || p === productId.value);
+    } catch (error) {
+      console.log("Failed to fetch wishlist status", error);
+    }
+  }
+};
+
+const toggleWishlist = async () => {
+  if (!username.value) {
+    push.error("Vui lòng đăng nhập để lưu sản phẩm yêu thích!");
+    router.push("/user/login");
+    return;
+  }
+  try {
+    if (isFavorite.value) {
+      await WishlistService.removeProduct(productId.value);
+      isFavorite.value = false;
+      push.info(`Đã xóa khỏi danh sách yêu thích`);
+    } else {
+      await WishlistService.addProduct(productId.value);
+      isFavorite.value = true;
+      push.success(`Đã thêm vào danh sách yêu thích`);
+    }
+  } catch (error) {
+    console.error("Toggle Wishlist Error:", error);
+    push.error("Đã xảy ra lỗi khi cập nhật danh sách yêu thích");
+  }
+};
 const activeTab = ref('description');
 const quantity = ref(1);
 const selectedImage = ref(0);
@@ -149,7 +185,7 @@ const productImages = computed(() => {
     return [img];
   }
   // Graceful fallback — no random picsum
-  return [`https://placehold.co/600x600/f0fdf4/16a34a?text=${encodeURIComponent((product.value.title || 'Product').slice(0, 12))}`];
+  return [`/images/product-missing.svg`];
 });
 
 const currentImageUrl = computed(() => productImages.value[selectedImage.value] || productImages.value[0]);
@@ -162,7 +198,7 @@ const handleMainImgError = (e) => {
   mainImageError.value = true;
   mainImageLoading.value = false;
   // Fallback to a colored placeholder
-  e.target.src = `https://placehold.co/600x600/f1f5f9/94a3b8?text=No+Image`;
+  e.target.src = `/images/product-missing.svg`;
 };
 
 const handleMainImgLoad = () => {
@@ -171,7 +207,7 @@ const handleMainImgLoad = () => {
 };
 
 const handleThumbError = (e) => {
-  e.target.src = `https://placehold.co/200x200/f1f5f9/94a3b8?text=IMG`;
+  e.target.src = `/images/product-missing.svg`;
 };
 
 
@@ -354,10 +390,10 @@ const fetchProductData = async (id) => {
   }
 };
 
-const handleAddToCart = () => {
+const handleAddToCart = (showToast = true) => {
   if (product.value.has_variants && !selectedVariant.value) {
     push.warning('Vui lòng chọn đầy đủ thuộc tính sản phẩm!');
-    return;
+    return false;
   }
   const cart = JSON.parse(localStorage.getItem('cart') || '[]');
   
@@ -407,10 +443,17 @@ const handleAddToCart = () => {
     });
   }
   localStorage.setItem('cart', JSON.stringify(cart));
-  push.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ hàng`);
+  if (showToast) {
+    push.success(`Đã thêm ${quantity.value} sản phẩm vào giỏ hàng`);
+  }
+  return true;
 };
 
-const handleBuyNow = () => { handleAddToCart(); router.push('/cart'); };
+const handleBuyNow = () => {
+  if (handleAddToCart(false)) {
+    router.push({ name: "cart.checkout" });
+  }
+};
 const incrementQty = () => { if (quantity.value < currentQuantity.value) quantity.value++; else push.warning('Số lượng vượt quá tồn kho!'); };
 const decrementQty = () => { if (quantity.value > 1) quantity.value--; };
 
@@ -436,10 +479,17 @@ const formatDate = (d) => {
 
 onMounted(() => {
   fetchProductData(productId.value);
+  fetchWishlistStatus();
   window.addEventListener('keydown', handleLightboxKey);
 });
 watch(() => route.params.id, (id) => {
-  if (id) { productId.value = id; quantity.value = 1; fetchProductData(id); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  if (id) { 
+    productId.value = id; 
+    quantity.value = 1; 
+    fetchProductData(id); 
+    fetchWishlistStatus();
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
+  }
 });
 onUnmounted(() => {
   clearInterval(timerInterval);
@@ -449,26 +499,26 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-[#f5f5f5]">
+  <div class="min-h-screen flex flex-col bg-[#F7F8F5]">
     <Header />
     <CategoryMenu />
 
     <main class="flex-grow w-full max-w-7xl mx-auto px-4 py-6 space-y-4">
 
-      <!-- Loading -->
+      <!-- Loading Skeleton -->
       <div v-if="loading" class="flex flex-col items-center justify-center py-40 space-y-4">
-        <div class="w-12 h-12 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
-        <p class="text-slate-400 text-sm font-semibold">Đang tải thông tin sản phẩm...</p>
+        <div class="w-12 h-12 border-4 border-[#006B57] border-t-transparent rounded-full animate-spin"></div>
+        <p class="text-[#5F716B] text-sm font-medium">Đang tải thông tin sản phẩm...</p>
       </div>
 
       <template v-else>
         <!-- Breadcrumb -->
-        <nav class="flex items-center gap-1.5 text-xs text-slate-400 bg-white px-4 py-3 rounded-xl shadow-sm">
-          <RouterLink to="/" class="hover:text-orange-500 transition">Trang chủ</RouterLink>
-          <span>›</span>
-          <span class="hover:text-orange-500 cursor-pointer transition">{{ product.brand_id?.name || 'Sản phẩm' }}</span>
-          <span>›</span>
-          <span class="text-slate-600 font-medium line-clamp-1">{{ product.title }}</span>
+        <nav class="flex items-center gap-1.5 text-xs text-[#5F716B] bg-white px-4 py-3 rounded-xl shadow-sm border border-[#EAECE6]">
+          <RouterLink to="/" class="hover:text-[#006B57] transition font-medium">Trang chủ</RouterLink>
+          <span class="text-[#DCE6E1]">›</span>
+          <span class="hover:text-[#006B57] cursor-pointer transition">{{ product.brand_id?.name || 'Sản phẩm' }}</span>
+          <span class="text-[#DCE6E1]">›</span>
+          <span class="text-[#123C34] font-semibold line-clamp-1">{{ product.title }}</span>
         </nav>
 
         <!-- MAIN PRODUCT BLOCK -->
@@ -502,9 +552,9 @@ onUnmounted(() => {
 
                 <!-- Product Image -->
                 <Transition name="img-fade" mode="out-in">
-                <img
+                <img referrerpolicy="no-referrer"
                   :key="currentImageUrl"
-                  :src="currentImageUrl"
+                  :src="currentImageUrl || 'https://via.placeholder.com/300'"
                   :alt="product.title || 'Product Image'"
                   class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                   :class="mainImageLoading ? 'opacity-0' : 'opacity-100'"
@@ -532,9 +582,9 @@ onUnmounted(() => {
                   @click="selectedImage = i; mainImageLoading = true"
                   class="w-20 h-20 rounded-xl overflow-hidden border-2 transition-all flex-shrink-0 bg-slate-50"
                   :class="selectedImage === i
-                    ? 'border-orange-500 shadow-md shadow-orange-200 scale-105'
-                    : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-slate-300'">
-                  <img
+                    ? 'border-[#006B57] shadow-md shadow-emerald-200 scale-105'
+                    : 'border-slate-200 opacity-60 hover:opacity-100 hover:border-[#006B57]/40'">
+                  <img referrerpolicy="no-referrer"
                     :src="img"
                     :alt="`Ảnh ${i + 1}`"
                     class="w-full h-full object-contain"
@@ -564,8 +614,10 @@ onUnmounted(() => {
 
             <!-- Product Info -->
             <div class="lg:col-span-7 p-6 flex flex-col gap-4">
+              <!-- Badges -->
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-bold text-orange-600 uppercase tracking-wider bg-orange-50 px-3 py-1 rounded-full border border-orange-100">{{ product.brand_id?.name || 'Testskin' }}</span>
+                <span class="text-xs font-bold text-[#006B57] uppercase tracking-wider bg-[#E8F0EC] px-3 py-1 rounded-full border border-[#C8DDD4]">{{ product.brand_id?.name || 'SkinMedi' }}</span>
+                <span class="text-xs font-semibold text-[#006B57] bg-[#E8F0EC] px-3 py-1 rounded-full border border-[#C8DDD4]">✓ Chính hãng</span>
                 <span v-if="product.prescription_required" class="text-xs font-bold text-red-600 uppercase tracking-wider bg-red-50 px-3 py-1 rounded-full border border-red-100 flex items-center gap-1">
                   💊 Thuốc kê đơn (Rx)
                 </span>
@@ -573,26 +625,26 @@ onUnmounted(() => {
                   ✨ AI khuyên dùng
                 </span>
               </div>
-              <h1 class="text-xl md:text-2xl font-black text-slate-800 leading-snug">{{ product.title }}</h1>
+              <h1 class="text-xl md:text-2xl font-bold text-[#123C34] leading-snug">{{ product.title }}</h1>
               <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex items-center gap-1">
-                  <span class="text-sm font-black text-orange-600 underline underline-offset-2">{{ avgRating }}</span>
-                  <div class="flex text-red-500 text-sm">
+                  <span class="text-sm font-bold text-amber-500">{{ avgRating }}</span>
+                  <div class="flex text-amber-400 text-sm">
                     <span v-for="i in 5" :key="i">{{ i <= Math.round(avgRating) ? '★' : '☆' }}</span>
                   </div>
                 </div>
-                <span class="text-slate-200">|</span>
-                <span class="text-xs text-slate-500 font-semibold underline underline-offset-2 cursor-pointer">{{ reviews.length }} Đánh Giá</span>
-                <span class="text-slate-200">|</span>
-                <span class="text-xs font-semibold" :class="currentQuantity > 0 ? 'text-emerald-600' : 'text-red-500'">
-                  {{ currentQuantity > 0 ? `Còn ${currentQuantity} sản phẩm` : 'Hết hàng' }}
+                <span class="text-[#DCE6E1]">|</span>
+                <span class="text-xs text-[#5F716B] font-medium cursor-pointer hover:text-[#006B57]">{{ reviews.length }} đánh giá</span>
+                <span class="text-[#DCE6E1]">|</span>
+                <span class="text-xs font-semibold" :class="currentQuantity > 0 ? 'text-[#006B57]' : 'text-red-500'">
+                  {{ currentQuantity > 0 ? `✓ Còn ${currentQuantity} sản phẩm` : '⚠ Hết hàng' }}
                 </span>
               </div>
 
               <!-- Price -->
-              <div class="bg-gradient-to-r from-slate-50 to-red-50/40 rounded-2xl p-4 border border-slate-100">
+              <div class="bg-[#F8F9F6] rounded-2xl p-4 border border-[#DCE8E1]">
                 <div class="flex items-baseline gap-3 flex-wrap">
-                  <span class="text-3xl font-black text-red-600">{{ displayPrice?.toLocaleString('vi-VN') }}đ</span>
+                  <span class="text-3xl font-black text-[#006B57]">{{ displayPrice?.toLocaleString('vi-VN') }}đ</span>
                   <template v-if="isFlashSaleActive">
                     <span class="text-base line-through text-slate-400">{{ product.price?.toLocaleString('vi-VN') }}đ</span>
                     <span class="bg-red-500 text-white text-xs font-black px-2.5 py-1 rounded-lg animate-pulse">-{{ discountPercent }}%</span>
@@ -641,7 +693,6 @@ onUnmounted(() => {
                     <div>✅ Bảo hiểm bảo vệ người tiêu dùng</div>
                   </div>
                 </div>
-                </div>
               </div>
 
               <!-- Product Variants Selectors -->
@@ -673,13 +724,22 @@ onUnmounted(() => {
               <!-- Actions -->
               <div class="flex gap-3 pt-2">
                 <button @click="handleAddToCart" :disabled="currentQuantity <= 0 || (product.has_variants && !selectedVariant)"
-                  class="flex-1 flex items-center justify-center gap-2 border-2 border-orange-500 text-orange-500 bg-white hover:bg-orange-50 font-extrabold py-3.5 rounded-xl transition text-sm shadow-sm disabled:opacity-40">
+                  class="flex-grow flex items-center justify-center gap-2 border-2 border-[#006B57] text-[#006B57] bg-white hover:bg-[#F2F7F5] font-bold py-3.5 rounded-xl transition text-sm shadow-sm disabled:opacity-40">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                   Thêm Vào Giỏ Hàng
                 </button>
                 <button @click="handleBuyNow" :disabled="currentQuantity <= 0 || (product.has_variants && !selectedVariant)"
-                  class="flex-1 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-extrabold py-3.5 rounded-xl transition text-sm shadow-lg shadow-orange-500/30 disabled:opacity-40">
-                  Mua Ngay
+                  class="flex-grow bg-[#006B57] hover:bg-[#005544] text-white font-bold py-3.5 rounded-xl transition text-sm shadow-lg shadow-emerald-700/25 disabled:opacity-40">
+                  ⚡ Mua Ngay
+                </button>
+                <button v-if="role !== 'staff'" @click="toggleWishlist" 
+                        class="w-12 h-12 flex-shrink-0 flex items-center justify-center rounded-xl border border-slate-300 bg-white hover:bg-slate-50 transition shadow-sm"
+                        title="Yêu thích">
+                  <span class="material-symbols-outlined text-[24px]" 
+                        :class="isFavorite ? 'text-red-500 font-bold' : 'text-gray-400'"
+                        :style="isFavorite ? 'font-variation-settings: \'FILL\' 1;' : ''">
+                    favorite
+                  </span>
                 </button>
               </div>
             </div>
@@ -690,10 +750,10 @@ onUnmounted(() => {
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
           <div class="lg:col-span-8 space-y-4">
             <!-- Chi Tiết Sản Phẩm -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div class="px-6 py-4 border-b border-slate-100">
-                <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-                  <span class="w-1 h-5 bg-emerald-500 rounded-full"></span> CHI TIẾT SẢN PHẨM
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-[#EAECE6]">
+              <div class="px-6 py-4 border-b border-[#EAECE6] bg-[#F8F9F6]">
+                <h2 class="text-sm font-bold text-[#123C34] uppercase tracking-wider flex items-center gap-2">
+                  <span class="w-1 h-5 bg-[#006B57] rounded-full"></span> Chi Tiết Sản Phẩm
                 </h2>
               </div>
               <div class="divide-y divide-slate-50 text-sm">
@@ -735,48 +795,46 @@ onUnmounted(() => {
             </div>
 
             <!-- Mô Tả Tabs -->
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
-              <div class="flex border-b border-slate-100 overflow-x-auto bg-slate-50">
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-[#EAECE6]">
+              <div class="flex border-b border-[#EAECE6] overflow-x-auto bg-[#F8F9F6]">
                 <button v-for="tab in ['description','usage','safety','warnings']" :key="tab"
                   @click="activeTab = tab"
-                  class="px-6 py-4 text-xs font-black whitespace-nowrap border-b-2 transition uppercase tracking-wider"
-                  :class="activeTab === tab ? 'border-emerald-500 text-emerald-600 bg-white' : 'border-transparent text-slate-400 hover:text-slate-600'">
-                  {{ tab === 'description' ? 'MÔ TẢ SẢN PHẨM' : tab === 'usage' ? 'HƯỚNG DẪN SỬ DỤNG' : tab === 'safety' ? 'CHỈ ĐỊNH & PHẢN ỨNG PHỤ' : 'CẢNH BÁO Y TẾ' }}
+                  class="px-6 py-4 text-xs font-semibold whitespace-nowrap border-b-2 transition tracking-wider"
+                  :class="activeTab === tab ? 'border-[#006B57] text-[#006B57] bg-white' : 'border-transparent text-[#5F716B] hover:text-[#123C34]'">
+                  {{ tab === 'description' ? 'Mô tả sản phẩm' : tab === 'usage' ? 'Hướng dẫn sử dụng' : tab === 'safety' ? 'Thành phần' : 'Cảnh báo y tế' }}
                 </button>
               </div>
               <div class="px-6 py-6 text-sm text-slate-600 leading-relaxed min-h-[200px] text-left">
+                <!-- Tab: Mô tả sản phẩm -->
                 <div v-if="activeTab === 'description'" class="space-y-5">
                   <p class="text-slate-800 font-bold italic">{{ product.title }}</p>
                   <p class="leading-7">{{ product.usage }}</p>
                   <div class="bg-emerald-50/50 border-l-4 border-emerald-500 p-4 rounded-r-xl space-y-3">
-                    <p class="font-black text-emerald-800">🌿 Công dụng & Tính chất chính:</p>
+                    <p class="font-black text-emerald-800">🌿 Công dụng &amp; Tính chất chính:</p>
                     <ul class="space-y-2 text-slate-700">
                       <li class="flex items-start gap-2"><span>🛡️</span><span><strong>Hiệu quả điều trị:</strong> Được khuyên dùng bởi các chuyên gia và kiểm duyệt bởi hệ thống da liễu AI.</span></li>
                       <li class="flex items-start gap-2"><span>🔬</span><span><strong>Kiểm nghiệm lâm sàng:</strong> Công thức chứa các hoạt chất chuyên sâu, giảm thiểu tối đa kích ứng cho da nhạy cảm.</span></li>
                     </ul>
-                  </div>                <ul class="space-y-2 text-slate-700">
-                      <li class="flex items-start gap-2"><span>🛡️</span><span><strong>Hiệu quả điều trị:</strong> Được khuyên dùng bởi các chuyên gia và kiểm duyệt bởi hệ thống da liễu AI.</span></li>
-                      <li class="flex items-start gap-2"><span>🔬</span><span><strong>Kiểm nghiệm lâm sàng:</strong> Công thức chứa các hoạt chất chuyên sâu, giảm thiểu tối đa kích ứng cho da nhạy cảm.</span></li>
-                    </ul>
                   </div>
+                  <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
                     <p class="font-black text-amber-600 mb-2">✨ Lợi ích khi sử dụng:</p>
-                    <ul class="list-disc pl-5 space-y-1"><li>Giúp da sạch sâu, mềm mại và tràn đầy độ ẩm.</li><li>Hạn chế tình trạng khô căng, bong tróc, mang lại làn da khỏe mạnh tự nhiên.</li><li>Phù hợp với mọi loại da, đặc biệt là da nhạy cảm và da khô.</li></ul>
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li>Giúp da sạch sâu, mềm mại và tràn đầy độ ẩm.</li>
+                      <li>Hạn chế tình trạng khô căng, bong tróc, mang lại làn da khỏe mạnh tự nhiên.</li>
+                      <li>Phù hợp với mọi loại da, đặc biệt là da nhạy cảm và da khô.</li>
+                    </ul>
                   </div>
                   <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
                     <p class="font-black text-emerald-700 mb-2">✅ Cam kết chất lượng:</p>
-                    <ul class="list-disc pl-5 space-y-1"><li>Hàng chính hãng 100% từ thương hiệu uy tín.</li><li>Đã được kiểm nghiệm bởi chuyên gia da liễu.</li><li>Không chứa chất gây hại, an toàn cho người dùng.</li></ul>
+                    <ul class="list-disc pl-5 space-y-1">
+                      <li>Hàng chính hãng 100% từ thương hiệu uy tín.</li>
+                      <li>Đã được kiểm nghiệm bởi chuyên gia da liễu.</li>
+                      <li>Không chứa chất gây hại, an toàn cho người dùng.</li>
+                    </ul>
                   </div>
                 </div>
-                <div v-else-if="activeTab === 'ingredients'" class="space-y-4">
-                  <h3 class="font-extrabold text-slate-800 text-base">Các hoạt chất chính</h3>
-                  <div v-if="product.ingredient_ids?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div v-for="ing in product.ingredient_ids" :key="ing._id" class="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
-                      <h4 class="font-black text-emerald-700">{{ ing.name }}</h4>
-                      <p class="text-xs text-slate-500 mt-1">{{ ing.usage }}</p>
-                    </div>
-                  </div>
-                  <div v-else class="p-6 bg-slate-50 rounded-xl text-center"><span class="text-4xl">🌿</span><p class="text-slate-500 font-semibold mt-2">Sản phẩm kết hợp từ các nguồn gốc dược liệu lành tính.</p></div>
-                </div>
+
+                <!-- Tab: Hướng dẫn sử dụng -->
                 <div v-else-if="activeTab === 'usage'" class="space-y-4">
                   <h3 class="font-extrabold text-slate-800 text-base">Hướng dẫn sử dụng</h3>
                   <ol class="space-y-3">
@@ -786,6 +844,23 @@ onUnmounted(() => {
                     </li>
                   </ol>
                 </div>
+
+                <!-- Tab: Chỉ định & Phản ứng phụ -->
+                <div v-else-if="activeTab === 'safety'" class="space-y-4">
+                  <h3 class="font-extrabold text-slate-800 text-base">Các hoạt chất chính</h3>
+                  <div v-if="product.ingredient_ids?.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div v-for="ing in product.ingredient_ids" :key="ing._id" class="p-4 bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl border border-emerald-100">
+                      <h4 class="font-black text-emerald-700">{{ ing.name }}</h4>
+                      <p class="text-xs text-slate-500 mt-1">{{ ing.usage }}</p>
+                    </div>
+                  </div>
+                  <div v-else class="p-6 bg-slate-50 rounded-xl text-center">
+                    <span class="text-4xl">🌿</span>
+                    <p class="text-slate-500 font-semibold mt-2">Sản phẩm kết hợp từ các nguồn gốc dược liệu lành tính.</p>
+                  </div>
+                </div>
+
+                <!-- Tab: Cảnh báo y tế -->
                 <div v-else-if="activeTab === 'warnings'" class="space-y-3">
                   <h3 class="font-extrabold text-slate-800 text-base">Cảnh báo an toàn</h3>
                   <div v-for="(w, i) in ['Chỉ sử dụng ngoài da, tránh tiếp xúc với niêm mạc mắt và miệng.','Ngưng sử dụng và tham khảo ý kiến Bác sĩ Da liễu nếu xuất hiện ngứa rát, nổi mẩn đỏ.','Bảo quản nơi khô ráo, thoáng mát, tránh ánh nắng mặt trời.','Để xa tầm tay trẻ em.']" :key="i" class="flex gap-3 items-start p-3 bg-red-50 rounded-xl border border-red-100">
@@ -799,29 +874,29 @@ onUnmounted(() => {
 
           <!-- Rating Sidebar -->
           <div class="lg:col-span-4" v-if="commentSettings.comment_on_product && commentSettings.comment_type === 'system' && commentSettings.comment_allow_rating">
-            <div class="bg-white rounded-2xl shadow-sm overflow-hidden sticky top-4">
-              <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="font-black text-slate-800 text-sm uppercase tracking-wider flex items-center gap-2">
-                  <span class="w-1 h-5 bg-amber-400 rounded-full"></span> Đánh Giá Nhanh
+            <div class="bg-white rounded-2xl shadow-sm overflow-hidden sticky top-4 border border-[#EAECE6]">
+              <div class="px-6 py-4 border-b border-[#EAECE6] bg-[#F8F9F6] flex items-center justify-between">
+                <h3 class="font-bold text-[#123C34] text-sm flex items-center gap-2">
+                  <span class="w-1 h-5 bg-amber-400 rounded-full"></span> Đánh Giá
                 </h3>
-                <span class="text-xs bg-amber-50 text-amber-600 px-2.5 py-0.5 rounded-full font-black border border-amber-100">{{ reviews.length }}</span>
+                <span class="text-xs bg-[#E8F0EC] text-[#006B57] px-2.5 py-0.5 rounded-full font-bold border border-[#C8DDD4]">{{ reviews.length }}</span>
               </div>
               <div class="px-6 py-4 flex items-center gap-4">
                 <div class="text-center">
-                  <div class="text-4xl font-black text-red-500">{{ avgRating }}</div>
-                  <div class="flex text-red-500 text-sm justify-center my-1">
+                  <div class="text-4xl font-black text-[#006B57]">{{ avgRating }}</div>
+                  <div class="flex text-amber-400 text-sm justify-center my-1">
                     <span v-for="i in 5" :key="i">{{ i <= Math.round(avgRating) ? '★' : '☆' }}</span>
                   </div>
-                  <div class="text-xs text-slate-400 font-semibold">{{ reviews.length }} đánh giá</div>
+                  <div class="text-xs text-[#5F716B] font-medium">{{ reviews.length }} đánh giá</div>
                 </div>
                 <div class="flex-1 space-y-1.5">
                   <div v-for="star in [5,4,3,2,1]" :key="star" class="flex items-center gap-2 text-xs">
-                    <span class="text-slate-600 w-3">{{ star }}</span>
-                    <span class="text-red-400">★</span>
-                    <div class="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                      <div class="h-full bg-red-400 rounded-full transition-all" :style="{ width: reviews.length ? (ratingCount(star) / reviews.length * 100) + '%' : '0%' }"></div>
+                    <span class="text-[#5F716B] w-3">{{ star }}</span>
+                    <span class="text-amber-400">★</span>
+                    <div class="flex-1 h-1.5 bg-[#E8F0EC] rounded-full overflow-hidden">
+                      <div class="h-full bg-[#006B57] rounded-full transition-all" :style="{ width: reviews.length ? (ratingCount(star) / reviews.length * 100) + '%' : '0%' }"></div>
                     </div>
-                    <span class="text-slate-400 w-4">{{ ratingCount(star) }}</span>
+                    <span class="text-[#5F716B] w-4">{{ ratingCount(star) }}</span>
                   </div>
                 </div>
               </div>
@@ -830,37 +905,37 @@ onUnmounted(() => {
         </div>
 
         <!-- ===== ĐÁNH GIÁ SẢN PHẨM (FULL WIDTH) ===== -->
-        <div v-if="commentSettings.comment_on_product" class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div v-if="commentSettings.comment_on_product" class="bg-white rounded-2xl shadow-sm overflow-hidden border border-[#EAECE6]">
           <!-- Header -->
-          <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
-            <h2 class="text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-2">
-              <span class="w-1 h-5 bg-red-500 rounded-full"></span> ĐÁNH GIÁ SẢN PHẨM
+          <div class="px-6 py-5 border-b border-[#EAECE6] bg-[#F8F9F6] flex items-center justify-between">
+            <h2 class="text-sm font-bold text-[#123C34] flex items-center gap-2">
+              <span class="w-1 h-5 bg-[#006B57] rounded-full"></span> Đánh Giá Sản Phẩm
             </h2>
-            <span class="text-xs text-slate-400 font-semibold">{{ reviews.length }} đánh giá</span>
+            <span class="text-xs text-[#5F716B] font-medium">{{ reviews.length }} đánh giá</span>
           </div>
 
           <!-- System Comments -->
           <template v-if="commentSettings.comment_type === 'system'">
             <!-- Rating Overview + Filter Row -->
-            <div v-if="commentSettings.comment_allow_rating" class="px-6 py-4 bg-orange-50/40 border-b border-slate-100 flex items-center gap-4 flex-wrap">
+            <div v-if="commentSettings.comment_allow_rating" class="px-6 py-4 bg-[#F8F9F6] border-b border-[#EAECE6] flex items-center gap-4 flex-wrap">
               <div class="flex items-center gap-3">
-                <span class="text-4xl font-black text-red-500">{{ avgRating }}</span>
+                <span class="text-4xl font-black text-[#006B57]">{{ avgRating }}</span>
                 <div class="flex flex-col">
-                  <div class="flex text-red-500 text-xl">
+                  <div class="flex text-amber-400 text-xl">
                     <span v-for="i in 5" :key="i">{{ i <= Math.round(avgRating) ? '★' : '☆' }}</span>
                   </div>
-                  <span class="text-xs text-slate-400 mt-0.5">Đánh giá tổng thể</span>
+                  <span class="text-xs text-[#5F716B] mt-0.5">Đánh giá tổng thể</span>
                 </div>
               </div>
               <div class="flex flex-wrap gap-2 ml-2">
                 <button @click="filterRating = 0"
-                  class="px-4 py-2 rounded-full text-xs font-bold border transition"
-                  :class="filterRating === 0 ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'border-slate-300 text-slate-600 hover:border-red-400 hover:text-red-500 bg-white'">
+                  class="px-4 py-2 rounded-full text-xs font-semibold border transition"
+                  :class="filterRating === 0 ? 'bg-[#006B57] text-white border-[#006B57]' : 'border-[#DCE6E1] text-[#5F716B] hover:border-[#006B57] hover:text-[#006B57] bg-white'">
                   Tất Cả ({{ reviews.length }})
                 </button>
                 <button v-for="star in [5,4,3,2,1]" :key="star" @click="filterRating = star"
-                  class="px-4 py-2 rounded-full text-xs font-bold border transition"
-                  :class="filterRating === star ? 'bg-red-500 text-white border-red-500 shadow-md shadow-red-200' : 'border-slate-300 text-slate-600 hover:border-red-400 hover:text-red-500 bg-white'">
+                  class="px-4 py-2 rounded-full text-xs font-semibold border transition"
+                  :class="filterRating === star ? 'bg-[#006B57] text-white border-[#006B57]' : 'border-[#DCE6E1] text-[#5F716B] hover:border-[#006B57] hover:text-[#006B57] bg-white'">
                   {{ star }} Sao ({{ ratingCount(star) }})
                 </button>
                 <button class="px-4 py-2 rounded-full text-xs font-bold border border-slate-300 text-slate-600 hover:border-orange-400 hover:text-orange-500 transition bg-white flex items-center gap-1.5">
@@ -963,10 +1038,10 @@ onUnmounted(() => {
           </div>
 
           <!-- Write Review Form -->
-          <div class="px-6 py-6 border-t-4 border-orange-100 bg-gradient-to-b from-orange-50/20 to-white">
-            <h3 class="font-black text-slate-800 text-sm mb-5 flex items-center gap-2">
-              <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-              VIẾT BÌNH LUẬN CỦA BẠN
+          <div class="px-6 py-6 border-t border-[#EAECE6] bg-[#F8F9F6]">
+            <h3 class="font-bold text-[#123C34] text-sm mb-5 flex items-center gap-2">
+              <svg class="w-5 h-5 text-[#006B57]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              Viết đánh giá của bạn
             </h3>
             <form @submit.prevent="submitReview" class="space-y-4">
               <!-- Star Selector -->
@@ -1009,7 +1084,7 @@ onUnmounted(() => {
 
               <div class="flex items-center gap-3">
                 <button type="submit" :disabled="submittingReview"
-                  class="px-8 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white font-extrabold py-3 rounded-xl text-sm shadow-md transition disabled:opacity-50 flex items-center gap-2">
+                  class="px-8 bg-[#006B57] hover:bg-[#005544] text-white font-bold py-3 rounded-xl text-sm shadow-md transition disabled:opacity-50 flex items-center gap-2">
                   <svg v-if="submittingReview" class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                   {{ submittingReview ? 'Đang gửi...' : 'Gửi Đánh Giá' }}
                 </button>
@@ -1028,10 +1103,10 @@ onUnmounted(() => {
         </div>
 
         <!-- Similar Products -->
-        <section v-if="similarProducts.length > 0" class="bg-white rounded-2xl shadow-sm p-6 space-y-5">
+        <section v-if="similarProducts.length > 0" class="bg-white rounded-2xl shadow-sm p-6 space-y-5 border border-[#EAECE6]">
           <div class="flex items-center gap-3">
-            <span class="w-1 h-6 bg-orange-500 rounded-full"></span>
-            <h3 class="text-sm font-black text-slate-800 uppercase tracking-wider">Sản Phẩm Tương Tự</h3>
+            <span class="w-1 h-6 bg-[#006B57] rounded-full"></span>
+            <h3 class="text-sm font-bold text-[#123C34]">Sản Phẩm Tương Tự</h3>
           </div>
           <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
             <ProductCard v-for="sim in similarProducts" :key="sim._id" :product="sim" />

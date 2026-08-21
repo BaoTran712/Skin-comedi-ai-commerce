@@ -15,7 +15,7 @@ const userService = new UserService();
 const router = useRouter();
 const users = ref([]);
 const searchText = ref("");
-const role = computed(() => localStorage.getItem("role"));
+const role = computed(() => (localStorage.getItem("role") || "").toUpperCase());
 
 const fetchUsers = async () => {
     try {
@@ -34,7 +34,7 @@ const searchFilteredUsers = computed(() => {
     const keyword = searchText.value.toLowerCase();
 
     return users.value.filter(user => {
-        const searchableText = [user.first_name, user.last_name, user.birthday, user.gender, user.address, user.phone]
+        const searchableText = [user.first_name, user.last_name, user.birthday, user.gender, user.addresses?.[0]?.address, user.addresses?.[0]?.phone]
             .filter(Boolean)
             .join(' ')
             .toLowerCase();
@@ -61,7 +61,7 @@ const handleDeleteAllUsers = async () => {
 };
 
 onMounted(async () => {
-    if (role.value !== "staff") {
+    if (role.value !== "STAFF" && role.value !== "ADMIN") {
         router.push("/");
     }
     fetchUsers();
@@ -130,8 +130,8 @@ onMounted(async () => {
                                 </td>
                                 <td>
                                     <div class="flex flex-col gap-0.5 text-xs">
-                                        <span class="font-bold">{{ user.phone }}</span>
-                                        <span class="opacity-60 italic line-clamp-1 max-w-[150px]">{{ user.address }}</span>
+                                        <span class="font-bold">{{ user.addresses?.[0]?.phone || '---' }}</span>
+                                        <span class="opacity-60 italic line-clamp-1 max-w-[150px]">{{ user.addresses?.[0]?.address || 'Chưa cập nhật' }}</span>
                                     </div>
                                 </td>
                                 <td class="text-right pr-8">

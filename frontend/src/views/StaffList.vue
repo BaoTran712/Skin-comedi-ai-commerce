@@ -61,8 +61,11 @@ const handleDeleteAllStaffs = async () => {
 };
 
 onMounted(async () => {
-  if (role.value !== "staff") {
+  const currentRole = (role.value || "").toUpperCase();
+  if (currentRole !== "ADMIN") {
+    push.error("Chỉ Quản trị viên (ADMIN) mới có quyền quản lý nhân viên");
     router.push("/");
+    return;
   }
   fetchStaffs();
 });

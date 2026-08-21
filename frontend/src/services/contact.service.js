@@ -5,6 +5,10 @@ class ContactService {
     this.api = ApiClient(baseUrl);
   }
 
+  async createContact(data) {
+    return (await this.api.post("/", data)).data;
+  }
+
   async getAllContacts() {
     return (await this.api.get("/")).data;
   }

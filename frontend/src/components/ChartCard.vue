@@ -17,7 +17,7 @@ const props = defineProps({
   backgroundColor: { type: String, default: 'rgba(54,162,235,0.4)' },
   borderColor: { type: String, default: 'rgba(54,162,235,1)' },
 });
-
+const emit = defineEmits(['chartClick']);
 const canvas = ref(null);
 let chartInstance = null;
 
@@ -41,6 +41,14 @@ const buildChart = () => {
       maintainAspectRatio: false,
       plugins: { legend: { display: false }, tooltip: { mode: 'index', intersect: false } },
       scales: { x: { display: true }, y: { display: true, beginAtZero: true } },
+      onClick: (event, elements) => {
+        if (elements && elements.length > 0) {
+          const index = elements[0].index;
+          const label = props.labels[index];
+          const value = props.data[index];
+          emit('chartClick', { index, label, value });
+        }
+      }
     },
   });
 };

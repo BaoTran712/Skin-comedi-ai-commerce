@@ -1,12 +1,10 @@
-// backend/src/routes/adminRevenue.route.js
-
 import express from "express";
-import { auth } from "../middlewares/auth.middleware.js";
+import { auth, authorize } from "../middlewares/auth.middleware.js";
 import { getRevenueByPeriod } from "../controllers/adminRevenue.controller.js";
 
 const router = express.Router();
 
-// Protected route – staff only
-router.get("/:period", auth, getRevenueByPeriod);
+// Sensitive revenue financial reports – ADMIN ONLY
+router.get("/:period", auth, authorize("ADMIN"), getRevenueByPeriod);
 
 export default router;

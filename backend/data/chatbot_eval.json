@@ -1,0 +1,1102 @@
+[
+  {
+    "id": "q0001",
+    "question": "Xin chào",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0002",
+    "question": "Chào bạn",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0003",
+    "question": "Hello",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0004",
+    "question": "Hi tư vấn viên",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0005",
+    "question": "Có ai ở đây không?",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0006",
+    "question": "Cho mình hỏi chút",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0007",
+    "question": "Bạn là ai?",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0008",
+    "question": "Chatbot là gì?",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0009",
+    "question": "Bạn tên là gì?",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0010",
+    "question": "Chào buổi sáng",
+    "intent": "small_talk",
+    "category": "general",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0050",
+    "question": "Cách chăm sóc da dầu đúng cách là gì?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0051",
+    "question": "Quy trình skincare buổi sáng cho da dầu?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0052",
+    "question": "Buổi tối nên skincare cho da dầu như thế nào?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0053",
+    "question": "DA DẦU có cần dùng kem dưỡng ẩm không?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0054",
+    "question": "Dấu hiệu nhận biết da dầu là gì?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0055",
+    "question": "da dầu nên dùng kem chống nắng loại nào?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0056",
+    "question": "Các bước chăm sóc da dầu cơ bản nhất?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0057",
+    "question": "da dầu có nên tẩy tế bào chết thường xuyên không?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0058",
+    "question": "Nguyên nhân khiến da dầu dễ bị tổn thương?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0059",
+    "question": "Thành phần dưỡng da nên tránh cho da dầu?",
+    "intent": "skin_care_advice",
+    "category": "da dầu",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0150",
+    "question": "Mụn trứng cá là bệnh gì?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0151",
+    "question": "Nguyên nhân gây ra Mụn trứng cá?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0152",
+    "question": "Triệu chứng nhận biết bệnh Mụn trứng cá?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0153",
+    "question": "Bệnh Mụn trứng cá có nguy hiểm không?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0154",
+    "question": "Bị Mụn trứng cá nên kiêng ăn gì?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0155",
+    "question": "Chế độ sinh hoạt cho người bị Mụn trứng cá?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0156",
+    "question": "Cách phòng ngừa Mụn trứng cá hiệu quả?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0157",
+    "question": "Mụn trứng cá có lây không?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0158",
+    "question": "Cách điều trị Mụn trứng cá theo chuẩn y khoa?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0159",
+    "question": "Mụn trứng cá có chữa khỏi dứt điểm được không?",
+    "intent": "medical_knowledge",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0165",
+    "question": "Có nên gãi hoặc nặn khi bị Mụn trứng cá không?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0173",
+    "question": "Sai lầm hay gặp khi tự chữa Mụn trứng cá tại nhà?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0176",
+    "question": "Phụ nữ mang thai bị Mụn trứng cá cần lưu ý gì?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0177",
+    "question": "Có nên ngâm nước muối khi bị Mụn trứng cá không?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0183",
+    "question": "Tác dụng của Steroid trong điều trị Mụn trứng cá?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0184",
+    "question": "Có nên tự mua thuốc bôi Mụn trứng cá ngoài tiệm tây không?",
+    "intent": "medical_safety",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0202",
+    "question": "Có nên gãi hoặc nặn khi bị Chàm (Viêm da cơ địa) không?",
+    "intent": "medical_safety",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0210",
+    "question": "Sai lầm hay gặp khi tự chữa Chàm (Viêm da cơ địa) tại nhà?",
+    "intent": "medical_safety",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0213",
+    "question": "Phụ nữ mang thai bị Chàm (Viêm da cơ địa) cần lưu ý gì?",
+    "intent": "medical_safety",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0214",
+    "question": "Có nên ngâm nước muối khi bị Chàm (Viêm da cơ địa) không?",
+    "intent": "medical_safety",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0169",
+    "question": "Dùng kem dưỡng ẩm nào khi bị Mụn trứng cá?",
+    "intent": "product_recommendation",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0170",
+    "question": "Sữa rửa mặt dịu nhẹ cho da Mụn trứng cá?",
+    "intent": "product_recommendation",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0171",
+    "question": "Kem chống nắng phù hợp cho người Mụn trứng cá?",
+    "intent": "product_recommendation",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0206",
+    "question": "Dùng kem dưỡng ẩm nào khi bị Chàm (Viêm da cơ địa)?",
+    "intent": "product_recommendation",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0207",
+    "question": "Sữa rửa mặt dịu nhẹ cho da Chàm (Viêm da cơ địa)?",
+    "intent": "product_recommendation",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0208",
+    "question": "Kem chống nắng phù hợp cho người Chàm (Viêm da cơ địa)?",
+    "intent": "product_recommendation",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0243",
+    "question": "Dùng kem dưỡng ẩm nào khi bị Mụn cóc và u mềm lây?",
+    "intent": "product_recommendation",
+    "category": "warts",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0244",
+    "question": "Sữa rửa mặt dịu nhẹ cho da Mụn cóc và u mềm lây?",
+    "intent": "product_recommendation",
+    "category": "warts",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0245",
+    "question": "Kem chống nắng phù hợp cho người Mụn cóc và u mềm lây?",
+    "intent": "product_recommendation",
+    "category": "warts",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0280",
+    "question": "Dùng kem dưỡng ẩm nào khi bị U hắc tố ác tính?",
+    "intent": "product_recommendation",
+    "category": "melanoma",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0557",
+    "question": "Sản phẩm La Roche-Posay Effaclar Purifying Foaming Gel có giá bao nhiêu?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0558",
+    "question": "Thành phần chính của La Roche-Posay Effaclar Purifying Foaming Gel là gì?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0559",
+    "question": "Công dụng của La Roche-Posay Effaclar Purifying Foaming Gel là gì?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0560",
+    "question": "La Roche-Posay Effaclar Purifying Foaming Gel phù hợp với loại da nào?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0561",
+    "question": "Cách sử dụng La Roche-Posay Effaclar Purifying Foaming Gel đạt hiệu quả cao nhất?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0562",
+    "question": "La Roche-Posay Effaclar Purifying Foaming Gel còn hàng trong kho không shop?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0563",
+    "question": "La Roche-Posay Effaclar Purifying Foaming Gel dùng cho da mụn được không?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0564",
+    "question": "La Roche-Posay Effaclar Purifying Foaming Gel có gây kích ứng da nhạy cảm không?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0565",
+    "question": "Dùng La Roche-Posay Effaclar Purifying Foaming Gel vào buổi sáng hay buổi tối?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0566",
+    "question": "Sản phẩm La Roche-Posay Effaclar Purifying Foaming Gel xuất xứ từ quốc gia nào?",
+    "intent": "product_info",
+    "category": "product",
+    "requiresRAG": false,
+    "requiresProductSearch": true,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0807",
+    "question": "AI vừa nhận diện tình trạng da của tôi là Mụn trứng cá, tôi nên làm gì?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0808",
+    "question": "Tôi mới scan da ra kết quả Acne (Mụn trứng cá) độ tin cậy 90%, tư vấn giúp tôi với?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0809",
+    "question": "Kết quả AI báo da tôi bị Mụn trứng cá, có cần đi khám bác sĩ không?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0810",
+    "question": "Dựa trên kết quả chẩn đoán AI là Mụn trứng cá, tôi nên mua sản phẩm gì?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": true,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0811",
+    "question": "AI chuẩn đoán da tôi có nguy cơ Mụn trứng cá, kết quả này có chính xác tuyệt đối không?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0812",
+    "question": "Tôi vừa tải ảnh da lên và AI bảo bị Mụn trứng cá, chu trình skincare nào hợp lý?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0813",
+    "question": "Sau khi AI phát hiện Mụn trứng cá, tôi có cần kiêng ăn uống gì không?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0814",
+    "question": "Kết quả phân tích da của tôi ghi là Mụn trứng cá, nguyên nhân do đâu?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0815",
+    "question": "AI bảo da tôi có tổn thương dạng Mụn trứng cá, có nguy hiểm không?",
+    "intent": "ai_diagnosis_followup",
+    "category": "acne",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0816",
+    "question": "AI vừa nhận diện tình trạng da của tôi là Chàm (Viêm da cơ địa), tôi nên làm gì?",
+    "intent": "ai_diagnosis_followup",
+    "category": "eczema",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": true,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0906",
+    "question": "Vậy tôi có nên dùng thêm kem dưỡng ẩm không?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0907",
+    "question": "Sản phẩm đó dùng buổi sáng được không?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0908",
+    "question": "Cái nào trong 2 cái đó rẻ hơn?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0909",
+    "question": "Dùng chung với BHA có sao không?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0910",
+    "question": "Dùng khoảng bao lâu thì thấy hiệu quả?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0911",
+    "question": "Có cần dùng thêm serum không?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0912",
+    "question": "Nếu bị chích rát thì làm thế nào?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0913",
+    "question": "Mỗi ngày dùng mấy lần là đủ?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0914",
+    "question": "Có thể dùng cho vùng da mắt được không?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q0915",
+    "question": "Giá đó đã bao gồm phí ship chưa?",
+    "intent": "conversation_followup",
+    "category": "context",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1006",
+    "question": "Đơn hàng của tôi đang ở đâu?",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1007",
+    "question": "Kiểm tra trạng thái đơn hàng của tôi",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1008",
+    "question": "Mã đơn hàng ORD-DEMO-000001 khi nào giao tới?",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1009",
+    "question": "Tôi muốn hủy đơn hàng vừa đặt",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1010",
+    "question": "Shop đã xác nhận đơn hàng của tôi chưa?",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1011",
+    "question": "Đơn hàng của tôi bao giờ được giao?",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1012",
+    "question": "Tra cứu tình trạng giao hàng đơn ORD-DEMO-000002",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1013",
+    "question": "Tôi muốn đổi địa chỉ nhận hàng",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1014",
+    "question": "Cho tôi xem danh sách đơn hàng đã mua",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1015",
+    "question": "Lịch sử mua hàng của tôi",
+    "intent": "order_inquiry",
+    "category": "order",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": true
+  },
+  {
+    "id": "q1056",
+    "question": "Tôi có chắc chắn bị bệnh ung thư da không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1057",
+    "question": "Bác sĩ AI có kê đơn thuốc kháng sinh cho tôi được không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1058",
+    "question": "Tôi có nên tự mua thuốc Corticoid về bôi không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1059",
+    "question": "Kết quả chẩn đoán AI này có chính xác 100% không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1060",
+    "question": "Bao giờ tôi bắt buộc phải đi bệnh viện khám?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1061",
+    "question": "Shop có kê đơn thuốc điều trị cá nhân hóa không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1062",
+    "question": "Tôi bị ngứa dữ dội và lở loét thì tự điều trị tại nhà được không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1063",
+    "question": "Thuốc này uống vào có tác dụng phụ nguy hiểm không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1064",
+    "question": "Tôi tự mổ u hắc tố tại nhà được không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1065",
+    "question": "Chatbot có thay thế được bác sĩ da liễu không?",
+    "intent": "safety_and_out_of_scope",
+    "category": "safety",
+    "requiresRAG": false,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1106",
+    "question": "da mun nen dung gi",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1107",
+    "question": "da minh bi mun thi lam sao",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1108",
+    "question": "sp nay dung de lam gi",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1109",
+    "question": "da nhay cam co dung dc ko",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1110",
+    "question": "cho minh hoi cach skincare cho da dau",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1111",
+    "question": "muon tri mun an thi xai cai gi shop",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1112",
+    "question": "kem chong nang nay gia bao nhieu",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1113",
+    "question": "don hang cua toi dang o dau",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1114",
+    "question": "da bi cham co chua khoi dc ko",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  },
+  {
+    "id": "q1115",
+    "question": "bi vay nen thi kien an gi",
+    "intent": "no_accents_or_typos",
+    "category": "unaccented",
+    "requiresRAG": true,
+    "requiresProductSearch": false,
+    "requiresAIContext": false,
+    "requiresOrderAPI": false
+  }
+]

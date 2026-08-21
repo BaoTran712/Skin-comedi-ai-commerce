@@ -5,8 +5,8 @@ class ChatService {
         this.api = createApiClient(baseUrl);
     }
 
-    async sendMessage(message) {
-        return (await this.api.post("/", { message })).data;
+    async sendMessage(message, history = [], aiContext = null) {
+        return (await this.api.post("/", { message, history, aiContext })).data;
     }
 }
 

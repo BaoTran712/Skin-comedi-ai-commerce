@@ -18,9 +18,16 @@ import importReceiptRouter from "./src/routes/importReceipt.route.js";
 import promotionRouter from "./src/routes/promotion.route.js";
 import settingRouter from "./src/routes/setting.route.js";
 import variantRouter from "./src/routes/variant.route.js";
+import addressRouter from "./src/routes/address.route.js";
 import passport from "./src/config/passport.js";
 import adminStatsRouter from "./src/routes/adminStats.route.js";
 import adminRevenueRouter from "./src/routes/adminRevenue.route.js";
+import aiRouter from "./src/routes/ai.route.js";
+import notificationRouter from "./src/routes/notification.route.js";
+import shippingRouter from "./src/routes/shipping.route.js";
+import wishlistRouter from "./src/routes/wishlist.route.js";
+import contactRouter from "./src/routes/contact.route.js";
+import recommendationRouter from "./src/routes/recommendation.routes.js";
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -47,7 +54,13 @@ app.use("/api/promotion", promotionRouter);
 app.use("/api/setting", settingRouter);
 app.use("/api/admin", adminStatsRouter);
 app.use("/api/admin/revenue", adminRevenueRouter);
-
+app.use("/api/address", addressRouter);
+app.use("/api/ai", aiRouter);
+app.use("/api/notification", notificationRouter);
+app.use("/api/shipping", shippingRouter);
+app.use("/api/wishlist", wishlistRouter);
+app.use("/api/contact", contactRouter);
+app.use("/api/recommendations", recommendationRouter);
 // Xử lý route không tồn tại
 app.use((req, res, next) => {
     return next(new ApiError(404, "Resource not found"));

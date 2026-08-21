@@ -13,7 +13,7 @@ class DiagnosisController {
             }
 
             const diagnosis = await this.diagnosisService.create({
-                user_id: req.body.user_id,
+                user_id: req.userId || req.body.user_id,
                 image_url: req.body.image_url,
                 notes: req.body.notes
             });
@@ -21,6 +21,24 @@ class DiagnosisController {
             return res.status(201).json(diagnosis);
         } catch (error) {
             return next(new ApiError(500, "An error occurred while creating the diagnosis"));
+        }
+    }
+
+    getMyHistory = async (req, res, next) => {
+        try {
+            const history = await this.diagnosisService.getHistory(req.userId);
+            return res.json(history);
+        } catch (error) {
+            return next(new ApiError(500, "An error occurred while retrieving diagnosis history"));
+        }
+    }
+
+    getMyLatest = async (req, res, next) => {
+        try {
+            const latest = await this.diagnosisService.getLatest(req.userId);
+            return res.json(latest);
+        } catch (error) {
+            return next(new ApiError(500, "An error occurred while retrieving the latest diagnosis"));
         }
     }
 

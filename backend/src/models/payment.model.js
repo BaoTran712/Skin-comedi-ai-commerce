@@ -13,13 +13,21 @@ const paymentSchema = mongoose.Schema({
     },
     payment_method: {
         type: String,
-        enum: ["COD", "BANK_TRANSFER", "VNPAY", "MOMO"],
+        enum: ["COD", "BANK_TRANSFER", "VIETQR", "VNPAY", "MOMO"],
         default: "COD",
     },
     payment_status: {
         type: String,
-        enum: ["unpaid", "paid", "refunded"],
+        enum: ["unpaid", "verifying", "paid", "refunded", "expired"],
         default: "unpaid",
+    },
+    // Timestamp when customer clicked "I have paid" button
+    customer_confirmed_at: {
+        type: Date,
+    },
+    // Admin/system notes on payment verification
+    payment_note: {
+        type: String,
     },
     amount: {
         type: Number,
@@ -27,6 +35,20 @@ const paymentSchema = mongoose.Schema({
     },
     transaction_id: {
         type: String,
+    },
+    // Transfer content that customer should use
+    transfer_content: {
+        type: String,
+    },
+    // MoMo specific tracking fields
+    momo_trans_id: {
+        type: String,
+    },
+    momo_result_code: {
+        type: Number,
+    },
+    paid_at: {
+        type: Date,
     }
 }, { timestamps: true });
 

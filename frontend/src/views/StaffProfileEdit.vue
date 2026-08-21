@@ -54,11 +54,20 @@ const handleStaffProfileDelete = async (id) => {
 };
 
 onMounted(async () => {
-  if (role.value !== "staff") {
+  const currentRole = (role.value || "").toLowerCase();
+  if (currentRole !== "staff" && currentRole !== "admin") {
     router.push("/");
     return;
   }
-  const targetId = (staffEditId !== staffId.value) ? staffEditId : staffId.value;
+
+  // Khóa bảo vệ: Nhân viên không được chỉnh sửa nhân viên khác
+  if (currentRole === "staff" && staffEditId !== staffId.value) {
+    push.error("Bạn không có quyền chỉnh sửa thông tin của nhân viên khác!");
+    router.push("/staffprofile");
+    return;
+  }
+
+  const targetId = (staffEditId && currentRole === "admin") ? staffEditId : staffId.value;
   try {
     const staffData = await staffService.getStaff(targetId);
     resetForm({

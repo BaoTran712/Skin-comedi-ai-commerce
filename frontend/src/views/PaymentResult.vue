@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import Header from '../components/Header.vue';
 import Footer from '../components/Footer.vue';
@@ -11,6 +11,8 @@ const loading = ref(true);
 const success = ref(false);
 const orderId = ref('');
 const error = ref('');
+
+const isCancelled = computed(() => error.value === 'cancelled');
 
 onMounted(() => {
   // Mock check delay for UX
@@ -49,29 +51,55 @@ onMounted(() => {
               <p class="text-gray-700"><span class="font-bold text-gray-800">Mã giao dịch:</span> {{ orderId }}</p>
               <p class="text-gray-700"><span class="font-bold text-gray-800">Trạng thái:</span> Đã thanh toán</p>
             </div>
-            <button @click="router.push('/userprofile')" class="pe-btn pe-btn--primary w-full mt-4">
+            <button @click="router.push('/ordercheck')" class="pe-btn pe-btn--primary w-full mt-4">
               Xem đơn hàng của tôi
             </button>
             <button @click="router.push('/')" class="btn btn-outline btn-sm rounded-full w-full mt-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900">
-              Về trang chủ
+              Tiếp tục mua hàng
             </button>
           </div>
 
+          <!-- Hủy thanh toán -->
+          <div v-else-if="isCancelled" class="space-y-6">
+            <div class="w-20 h-20 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto text-4xl border border-amber-100 shadow-sm">
+              ⚠
+            </div>
+            <h2 class="text-2xl font-black text-gray-900 leading-tight">Bạn đã hủy thanh toán</h2>
+            <p class="text-gray-500 text-sm leading-relaxed">
+              Giao dịch thanh toán đã bị hủy bỏ. Đơn hàng của bạn vẫn được lưu và chưa bị thanh toán. Bạn có thể thử lại bất cứ lúc nào.
+            </p>
+            <div class="bg-amber-50/30 border border-amber-100/50 rounded-xl p-4 text-left text-sm text-amber-700">
+              <p>Lý do: Bạn đã chủ động hủy giao dịch trên cổng thanh toán.</p>
+            </div>
+            <button @click="router.push('/ordercheck')" class="pe-btn pe-btn--primary w-full mt-4">
+              Xem đơn hàng
+            </button>
+            <button @click="router.push('/')" class="btn btn-outline btn-sm rounded-full w-full mt-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900">
+              Tiếp tục mua hàng
+            </button>
+          </div>
+
+          <!-- Thất bại -->
           <div v-else class="space-y-6">
             <div class="w-20 h-20 bg-rose-50 text-rose-600 rounded-full flex items-center justify-center mx-auto text-4xl border border-rose-100 shadow-sm">
               ✕
             </div>
             <h2 class="text-2xl font-black text-gray-900 leading-tight">Thanh toán thất bại</h2>
             <p class="text-gray-500 text-sm leading-relaxed">
-              Giao dịch thanh toán trực tuyến không thành công hoặc đã bị hủy bỏ từ phía người dùng.
+              Giao dịch thanh toán trực tuyến không thành công. Vui lòng thử lại.
             </p>
             <div class="bg-rose-50/30 border border-rose-100/50 rounded-xl p-4 text-left text-sm text-rose-700">
               <p v-if="error === 'invalid_signature'">Lỗi: Chữ ký xác thực của cổng thanh toán không hợp lệ.</p>
               <p v-else-if="error === 'update_failed'">Lỗi: Đã có lỗi xảy ra khi cập nhật đơn hàng.</p>
-              <p v-else>Lý do: Giao dịch bị hủy hoặc tài khoản thẻ không đủ số dư.</p>
+              <p v-else-if="error === 'missing_secret'">Lỗi: Hệ thống chưa được cấu hình cổng thanh toán.</p>
+              <p v-else-if="error === 'server_error'">Lỗi: Đã có lỗi xảy ra phía máy chủ.</p>
+              <p v-else>Lý do: Giao dịch bị từ chối hoặc tài khoản thẻ không đủ số dư.</p>
             </div>
-            <button @click="router.push('/cart')" class="pe-btn pe-btn--primary w-full mt-4">
-              Quay lại giỏ hàng
+            <button @click="router.push('/ordercheck')" class="pe-btn pe-btn--primary w-full mt-4">
+              Xem đơn hàng
+            </button>
+            <button @click="router.push('/')" class="btn btn-outline btn-sm rounded-full w-full mt-2 border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900">
+              Tiếp tục mua hàng
             </button>
           </div>
 
@@ -130,3 +158,4 @@ onMounted(() => {
   box-shadow: 0 6px 24px rgba(13,148,136,0.5);
 }
 </style>
+

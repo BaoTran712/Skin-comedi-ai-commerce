@@ -1,0 +1,68 @@
+[
+  {
+    "disease_id": "KB_001",
+    "disease_name": "Acne",
+    "product_rules": [
+      {
+        "product_type": "Cleanser",
+        "allowed": true,
+        "preferred_textures": ["Gel", "Foam"],
+        "required_tags": ["Oil-Free", "Salicylic Acid"]
+      },
+      {
+        "product_type": "Moisturizer",
+        "allowed": true,
+        "preferred_textures": ["Water Gel", "Light Lotion"],
+        "required_tags": ["Non-comedogenic", "Oil-Free"]
+      },
+      {
+        "product_type": "Sunscreen",
+        "allowed": true,
+        "preferred_textures": ["Fluid", "Dry Touch"],
+        "required_tags": ["SPF 50+", "Non-comedogenic"]
+      }
+    ]
+  },
+  {
+    "disease_id": "KB_002",
+    "disease_name": "Eczema",
+    "product_rules": [
+      {
+        "product_type": "Cleanser",
+        "allowed": true,
+        "preferred_textures": ["Cream", "Syndet Bar", "Cleansing Oil"],
+        "required_tags": ["Soap-Free", "Fragrance-Free"]
+      },
+      {
+        "product_type": "Moisturizer",
+        "allowed": true,
+        "preferred_textures": ["Heavy Cream", "Balm", "Ointment"],
+        "required_tags": ["Ceramides", "Fragrance-Free"]
+      },
+      {
+        "product_type": "Sunscreen",
+        "allowed": true,
+        "preferred_textures": ["Mineral Cream"],
+        "required_tags": ["100% Zinc Oxide", "Physical Sunscreen"]
+      }
+    ]
+  },
+  {
+    "disease_id": "KB_005",
+    "disease_name": "Rosacea",
+    "product_rules": [
+      {
+        "product_type": "Treatment",
+        "allowed": true,
+        "preferred_textures": ["Gel", "Light Cream"],
+        "required_tags": ["Azelaic Acid 15%"]
+      },
+      {
+        "product_type": "Sunscreen",
+        "allowed": true,
+        "preferred_textures": ["Green Tinted Mineral Fluid"],
+        "required_tags": ["Physical Sunscreen", "Zinc Oxide"]
+      }
+    ]
+  }
+]

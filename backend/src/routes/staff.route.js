@@ -1,5 +1,5 @@
 import express from "express";
-import auth from "../middlewares/auth.middleware.js";
+import { auth, authorize } from "../middlewares/auth.middleware.js";
 import StaffController from "../controllers/staff.controller.js";
 
 const router = express.Router();
@@ -7,13 +7,13 @@ const router = express.Router();
 router.route("/login").post(StaffController.login);
 
 router.route("/")
-    .post(StaffController.create)
-    .get(StaffController.findAll)
-    .delete(auth, StaffController.deleteAll);
+    .post(auth, authorize("ADMIN"), StaffController.create)
+    .get(auth, authorize("ADMIN"), StaffController.findAll)
+    .delete(auth, authorize("ADMIN"), StaffController.deleteAll);
 
 router.route("/:id")
-    .put(auth, StaffController.update)
-    .get(auth, StaffController.findOne)
-    .delete(auth, StaffController.deleteOne);
+    .put(auth, authorize("ADMIN", "STAFF"), StaffController.update)
+    .get(auth, authorize("ADMIN", "STAFF"), StaffController.findOne)
+    .delete(auth, authorize("ADMIN"), StaffController.deleteOne);
 
 export default router;

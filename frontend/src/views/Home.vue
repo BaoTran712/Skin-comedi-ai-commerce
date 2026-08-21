@@ -1,11 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import Header from '../components/Header.vue';
-import CategoryMenu from '../components/CategoryMenu.vue';
-import HeroCarousel from '../components/HeroCarousel.vue';
-import QuickServiceCard from '../components/QuickServiceCard.vue';
 import FlashSaleSection from '../components/FlashSaleSection.vue';
-import AIDiagnosisBanner from '../components/AIDiagnosisBanner.vue';
 import RecommendationSection from '../components/RecommendationSection.vue';
 import ProductCard from '../components/ProductCard.vue';
 import Footer from '../components/Footer.vue';
@@ -15,55 +11,19 @@ const productService = new ProductService();
 const allProducts = ref([]);
 const loading = ref(true);
 
-const quickServices = ref([
-  { 
-    title: "Chẩn Đoán Da AI", 
-    desc: "Quét và phát hiện bệnh da nhanh chóng", 
-    to: "/diagnosis", 
-    gradient: "from-emerald-500/10 to-teal-600/10 hover:bg-emerald-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 21l-1.813-5.096L2.096 15 7.192 13.187 9 8.096l1.813 5.091L15.904 15l-5.091 1.813zM21 15h-3m3 3h-3m3-6h-3M9 3H6m3 3H6m3-6H6"/></svg>` 
-  },
-  { 
-    title: "Mua Thuốc Kê Đơn", 
-    desc: "Chụp toa thuốc, dược sĩ giao ngay", 
-    to: "/products", 
-    gradient: "from-teal-500/10 to-emerald-600/10 hover:bg-teal-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v8m-4-4h8m1 9a9 9 0 110-18 9 9 0 010 18z"/></svg>` 
-  },
-  { 
-    title: "Tư Vấn Bác Sĩ", 
-    desc: "Trò chuyện trực tuyến với bác sĩ chuyên khoa", 
-    to: "/contacts", 
-    gradient: "from-emerald-500/10 to-emerald-600/10 hover:bg-emerald-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002 2H7c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>` 
-  },
-  { 
-    title: "Tìm Cửa Hàng", 
-    desc: "Hệ thống nhà thuốc gần bạn nhất", 
-    to: "/userprofile", 
-    gradient: "from-rose-500/10 to-rose-600/10 hover:bg-rose-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>` 
-  },
-  { 
-    title: "Đơn Hàng Của Tôi", 
-    desc: "Theo dõi tình trạng đơn mua", 
-    to: "/ordercheck", 
-    gradient: "from-amber-500/10 to-amber-600/10 hover:bg-amber-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>` 
-  },
-  { 
-    title: "100% Chính Hãng", 
-    desc: "Cam kết hoàn tiền 200% nếu giả", 
-    to: "/products", 
-    gradient: "from-cyan-500/10 to-cyan-600/10 hover:bg-cyan-50", 
-    iconSvg: `<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>` 
-  }
+const categories = ref([
+  { name: "Chăm sóc da mụn", tag: "mụn", icon: "healing", desc: "Giảm sưng viêm & làm dịu" },
+  { name: "Da nhạy cảm", tag: "nhạy cảm", icon: "spa", desc: "Phục hồi màng bảo vệ" },
+  { name: "Dưỡng ẩm sâu", tag: "khô", icon: "water_drop", desc: "Cấp nước & mềm mịn" },
+  { name: "Chống nắng da liễu", tag: "chống nắng", icon: "wb_sunny", desc: "Bảo vệ phổ rộng" },
+  { name: "Làm sạch dịu nhẹ", tag: "làm sạch", icon: "soap", desc: "Sạch sâu không khô căng" },
+  { name: "Serum & Phục hồi", tag: "serum", icon: "science", desc: "Hoạt chất chuyên sâu" }
 ]);
 
 const blogArticles = ref([
-  { id: 1, title: "Làm sao để loại bỏ mụn trứng cá cứng đầu?", category: "Mẹo chăm sóc da", desc: "Tìm hiểu nguyên nhân hình thành mụn và các bước chăm sóc da bị mụn được bác sĩ da liễu khuyên dùng.", image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=400", date: "07/07/2026" },
-  { id: 2, title: "Hiểu về bệnh chàm (Eczema) và cách phục hồi hàng rào bảo vệ", category: "Bệnh lý da liễu", desc: "Các giải pháp phục hồi độ ẩm sâu và giảm ngứa rát khó chịu tức thì cho người bị viêm da cơ địa.", image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=80&w=400", date: "06/07/2026" },
-  { id: 3, title: "Top 5 thành phần vàng cho da nhạy cảm", category: "Đánh giá sản phẩm", desc: "Niacinamide, Panthenol, Hyaluronic Acid... Đâu là thành phần phù hợp nhất với làn da của bạn?", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=400", date: "05/07/2026" }
+  { id: 1, title: "Làm sao để loại bỏ mụn trứng cá cứng đầu?", category: "Cẩm nang da liễu", desc: "Tìm hiểu nguyên nhân hình thành mụn và các bước chăm sóc da bị mụn được bác sĩ da liễu khuyên dùng.", image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=600", date: "07/08/2026" },
+  { id: 2, title: "Hiểu về bệnh chàm (Eczema) & cách phục hồi hàng rào bảo vệ", category: "Bệnh lý da", desc: "Các giải pháp phục hồi độ ẩm sâu và giảm ngứa rát khó chịu tức thì cho người bị viêm da cơ địa.", image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=80&w=600", date: "06/08/2026" },
+  { id: 3, title: "Top 5 thành phần vàng cho da nhạy cảm", category: "Thành phần hoạt chất", desc: "Niacinamide, Panthenol, Hyaluronic Acid... Đâu là thành phần phù hợp nhất với làn da của bạn?", image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&q=80&w=600", date: "05/08/2026" }
 ]);
 
 const fetchProducts = async () => {
@@ -77,7 +37,7 @@ const fetchProducts = async () => {
   }
 };
 
-// Filtered lists
+// Filtered lists from MongoDB database
 const flashSaleProducts = computed(() => {
   return allProducts.value.filter(p => p.flash_sale_price > 0 && p.quantity > 0).slice(0, 10);
 });
@@ -87,15 +47,48 @@ const recommendedProducts = computed(() => {
 });
 
 const acneProducts = computed(() => {
-  return allProducts.value.filter(p => p.pathology?.includes("mụn")).slice(0, 5);
+  const match = allProducts.value.filter(p => {
+    const searchStr = [
+      p.title, p.name, p.category, p.description, p.usage,
+      ...(Array.isArray(p.pathology) ? p.pathology : [p.pathology]),
+      ...(Array.isArray(p.skin_type) ? p.skin_type : [p.skin_type]),
+      ...(Array.isArray(p.skin_type_tags) ? p.skin_type_tags : [p.skin_type_tags]),
+      ...(Array.isArray(p.skin_conditions_supported) ? p.skin_conditions_supported : [p.skin_conditions_supported]),
+      ...(Array.isArray(p.ingredient_tags) ? p.ingredient_tags : [p.ingredient_tags]),
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchStr.includes("mụn") || searchStr.includes("acne") || searchStr.includes("bha") || searchStr.includes("salicylic");
+  });
+  return match.length > 0 ? match.slice(0, 5) : allProducts.value.slice(0, 5);
 });
 
 const sensitiveProducts = computed(() => {
-  return allProducts.value.filter(p => p.skin_type?.includes("da nhạy cảm")).slice(0, 5);
+  const match = allProducts.value.filter(p => {
+    const searchStr = [
+      p.title, p.name, p.category, p.description, p.usage,
+      ...(Array.isArray(p.pathology) ? p.pathology : [p.pathology]),
+      ...(Array.isArray(p.skin_type) ? p.skin_type : [p.skin_type]),
+      ...(Array.isArray(p.skin_type_tags) ? p.skin_type_tags : [p.skin_type_tags]),
+      ...(Array.isArray(p.skin_conditions_supported) ? p.skin_conditions_supported : [p.skin_conditions_supported]),
+      ...(Array.isArray(p.ingredient_tags) ? p.ingredient_tags : [p.ingredient_tags]),
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchStr.includes("nhạy cảm") || searchStr.includes("phục hồi") || searchStr.includes("dịu") || searchStr.includes("b5") || searchStr.includes("ceramide");
+  });
+  return match.length > 0 ? match.slice(0, 5) : allProducts.value.slice(5, 10);
 });
 
 const drySkinProducts = computed(() => {
-  return allProducts.value.filter(p => p.skin_type?.includes("da khô")).slice(0, 5);
+  const match = allProducts.value.filter(p => {
+    const searchStr = [
+      p.title, p.name, p.category, p.description, p.usage,
+      ...(Array.isArray(p.pathology) ? p.pathology : [p.pathology]),
+      ...(Array.isArray(p.skin_type) ? p.skin_type : [p.skin_type]),
+      ...(Array.isArray(p.skin_type_tags) ? p.skin_type_tags : [p.skin_type_tags]),
+      ...(Array.isArray(p.skin_conditions_supported) ? p.skin_conditions_supported : [p.skin_conditions_supported]),
+      ...(Array.isArray(p.ingredient_tags) ? p.ingredient_tags : [p.ingredient_tags]),
+    ].filter(Boolean).join(' ').toLowerCase();
+    return searchStr.includes("khô") || searchStr.includes("ẩm") || searchStr.includes("hyaluronic") || searchStr.includes("cấp nước");
+  });
+  return match.length > 0 ? match.slice(0, 5) : allProducts.value.slice(0, 5);
 });
 
 onMounted(() => {
@@ -104,160 +97,318 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-50">
-    <!-- Header components -->
+  <div class="min-h-screen flex flex-col bg-[#FAF8F5] font-sans text-[#2A2723]">
+    <!-- Header -->
     <Header />
-    <CategoryMenu />
 
-    <!-- Main Content Area -->
-    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 space-y-12 md:space-y-16">
+    <!-- Main Editorial Content -->
+    <main class="flex-grow space-y-24 pb-24">
       
-      <!-- 1. Hero Carousel -->
-      <HeroCarousel />
+      <!-- 1. ARTISTIC HERO SECTION -->
+      <section class="relative bg-[#F4F1EA] border-b border-[#EBE7DF] overflow-hidden py-16 md:py-24 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          
+          <!-- Hero Text -->
+          <div class="lg:col-span-7 space-y-8 text-left">
+            <div class="inline-flex items-center gap-2 px-3.5 py-1 bg-[#FAF8F5] border border-[#EBE7DF] rounded-full text-[11px] font-semibold text-[#4A5D4E] uppercase tracking-widest">
+              <span class="w-2 h-2 rounded-full bg-[#4A5D4E]"></span>
+              <span>Dermatology AI Skincare</span>
+            </div>
 
-      <!-- 2. Quick Services Shortcuts -->
-      <section class="space-y-6">
-        <div class="text-left">
-          <span class="text-emerald-600 font-extrabold text-[10px] tracking-widest uppercase bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-            Dịch vụ tiện ích
-          </span>
-          <h2 class="text-2xl md:text-3xl font-black text-slate-800 mt-2">
-            Trải nghiệm dịch vụ y khoa hiện đại
-          </h2>
+            <h1 class="font-serif text-4xl sm:text-5xl md:text-6xl text-[#2A2723] font-normal leading-[1.15] tracking-tight">
+              CHĂM SÓC DA <br />
+              <span class="italic font-serif font-light text-[#4A5D4E]">THEO CÁCH</span> <br />
+              THÔNG MINH HƠN
+            </h1>
+
+            <p class="text-sm md:text-base text-[#6B6357] font-light max-w-lg leading-relaxed">
+              Tích hợp trí tuệ nhân tạo nhận diện chuẩn y khoa và dược mỹ phẩm thuần chay lành tính, giúp phục hồi và bảo vệ làn da của bạn mỗi ngày.
+            </p>
+
+            <div class="flex flex-wrap gap-4 pt-2">
+              <RouterLink to="/diagnosis" class="px-7 py-3.5 bg-[#4A5D4E] text-[#FAF8F5] hover:bg-[#3E4E42] rounded-full text-xs font-semibold uppercase tracking-widest shadow-md transition duration-300 flex items-center gap-2">
+                <span>PHÂN TÍCH DA NGAY (AI)</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </RouterLink>
+              <RouterLink to="/products" class="px-7 py-3.5 border border-[#2A2723] text-[#2A2723] hover:bg-[#2A2723] hover:text-[#FAF8F5] rounded-full text-xs font-semibold uppercase tracking-widest transition duration-300">
+                KHÁM PHÁ SẢN PHẨM
+              </RouterLink>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-6 pt-8 border-t border-[#EBE7DF] text-left max-w-md">
+              <div>
+                <span class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal block">98.4%</span>
+                <span class="text-[11px] text-[#8C8275] uppercase tracking-wider block mt-1">Độ chính xác AI</span>
+              </div>
+              <div>
+                <span class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal block">100%</span>
+                <span class="text-[11px] text-[#8C8275] uppercase tracking-wider block mt-1">Dược phẩm thật</span>
+              </div>
+              <div>
+                <span class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal block">24/7</span>
+                <span class="text-[11px] text-[#8C8275] uppercase tracking-wider block mt-1">Dược sĩ tư vấn</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero Still-Life Image -->
+          <div class="lg:col-span-5 relative">
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl border border-[#EBE7DF] aspect-[4/5] bg-white">
+              <img 
+                src="https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&q=80&w=800" 
+                alt="Artistic Skincare Product Still Life" 
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-[#2A2723]/40 via-transparent to-transparent"></div>
+              
+              <!-- Floating Badge -->
+              <div class="absolute bottom-6 left-6 right-6 bg-[#FAF8F5]/90 backdrop-blur-md p-4 rounded-2xl border border-[#EBE7DF] text-left">
+                <p class="text-[10px] text-[#4A5D4E] uppercase tracking-widest font-bold">Giải pháp y khoa hàng đầu</p>
+                <p class="font-serif text-base text-[#2A2723] font-medium mt-0.5">Phục hồi hàng rào bảo vệ da tự nhiên</p>
+              </div>
+            </div>
+          </div>
+
         </div>
-        
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          <div v-for="(service, idx) in quickServices" :key="idx">
-            <QuickServiceCard 
-              :title="service.title"
-              :icon="service.icon"
-              :desc="service.desc"
-              :to="service.to"
-              :gradient="service.gradient"
-              :iconColor="service.iconColor"
-            />
+      </section>
+
+      <!-- 2. AI SKIN ANALYSIS SECTION ("Hiểu làn da của bạn") -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8">
+        <div class="bg-gradient-to-br from-[#FAFDFB] to-[#E8F7EF]/40 rounded-[32px] p-8 md:p-14 border border-[#E1ECE7] shadow-xl text-left relative overflow-hidden">
+          <!-- Decorative Background Elements -->
+          <div class="absolute -top-40 -right-40 w-96 h-96 bg-[#E8F7EF]/30 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-40 -left-40 w-96 h-96 bg-[#008F6B]/5 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+            <!-- Left content -->
+            <div class="lg:col-span-5 space-y-6">
+              <div class="inline-flex items-center gap-2 px-3 py-1 bg-[#E8F7EF] border border-[#008F6B]/20 rounded-full text-xs font-semibold text-[#005B4F] uppercase tracking-wider">
+                <span class="material-symbols-outlined text-sm">psychology</span>
+                <span>CÔNG NGHỆ AI DA LIỄU</span>
+              </div>
+              <h2 class="font-serif text-3xl md:text-4xl text-[#123F38] font-bold leading-tight">
+                Hiểu Làn Da Của Bạn <br />
+                <span class="italic text-[#008F6B] font-serif font-light">Chỉ Sau 5 Giây</span>
+              </h2>
+              <p class="text-sm text-[#6F7F7A] font-medium leading-relaxed">
+                AI hỗ trợ phân tích hình ảnh vùng da, nhận diện dấu hiệu bất thường như mụn, chàm, vảy nến và đưa ra gợi ý phác đồ chăm sóc cá nhân hóa chuẩn y khoa.
+              </p>
+              <RouterLink to="/diagnosis" class="inline-flex items-center gap-2.5 px-8 py-4 bg-[#005B4F] hover:bg-[#003F38] text-white rounded-full text-xs font-extrabold uppercase tracking-widest shadow-md hover:shadow-lg transition duration-300 transform hover:-translate-y-0.5">
+                <span>PHÂN TÍCH DA NGAY</span>
+                <span class="material-symbols-outlined text-base">arrow_forward</span>
+              </RouterLink>
+            </div>
+            
+            <!-- Right cards -->
+            <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <!-- Card 01 -->
+              <div class="bg-white border border-[#E1ECE7] p-6 rounded-[24px] space-y-4 hover:border-[#008F6B] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group shadow-xs">
+                <div class="flex justify-between items-start">
+                  <span class="font-serif text-4xl font-extrabold text-[#008F6B]/20 group-hover:text-[#008F6B] transition-colors">01</span>
+                  <div class="w-8 h-8 rounded-full bg-[#E8F7EF] flex items-center justify-center text-[#005B4F]">
+                    <span class="material-symbols-outlined text-base">photo_camera</span>
+                  </div>
+                </div>
+                <div class="space-y-1 text-left">
+                  <h3 class="font-bold text-sm text-[#123F38] uppercase tracking-wider">Tải Ảnh Da</h3>
+                  <p class="text-xs text-[#6F7F7A] font-medium leading-relaxed">Chụp hoặc chọn hình ảnh vùng da cần kiểm tra.</p>
+                </div>
+              </div>
+              
+              <!-- Card 02 -->
+              <div class="bg-white border border-[#E1ECE7] p-6 rounded-[24px] space-y-4 hover:border-[#008F6B] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group shadow-xs">
+                <div class="flex justify-between items-start">
+                  <span class="font-serif text-4xl font-extrabold text-[#008F6B]/20 group-hover:text-[#008F6B] transition-colors">02</span>
+                  <div class="w-8 h-8 rounded-full bg-[#E8F7EF] flex items-center justify-center text-[#005B4F]">
+                    <span class="material-symbols-outlined text-base">analytics</span>
+                  </div>
+                </div>
+                <div class="space-y-1 text-left">
+                  <h3 class="font-bold text-sm text-[#123F38] uppercase tracking-wider">AI Phân Tích</h3>
+                  <p class="text-xs text-[#6F7F7A] font-medium leading-relaxed">AI phân tích hình ảnh và đưa ra kết quả sơ bộ.</p>
+                </div>
+              </div>
+              
+              <!-- Card 03 -->
+              <div class="bg-white border border-[#E1ECE7] p-6 rounded-[24px] space-y-4 hover:border-[#008F6B] hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group shadow-xs">
+                <div class="flex justify-between items-start">
+                  <span class="font-serif text-4xl font-extrabold text-[#008F6B]/20 group-hover:text-[#008F6B] transition-colors">03</span>
+                  <div class="w-8 h-8 rounded-full bg-[#E8F7EF] flex items-center justify-center text-[#005B4F]">
+                    <span class="material-symbols-outlined text-base">spa</span>
+                  </div>
+                </div>
+                <div class="space-y-1 text-left">
+                  <h3 class="font-bold text-sm text-[#123F38] uppercase tracking-wider">Gợi Ý Chuẩn</h3>
+                  <p class="text-xs text-[#6F7F7A] font-medium leading-relaxed">Đề xuất hướng chăm sóc và sản phẩm phù hợp.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      <!-- 3. Flash Sale Section (if active flash sale items exist) -->
-      <section v-if="flashSaleProducts.length > 0">
+      <!-- 3. CATEGORY SECTION ("Khám phá theo nhu cầu") -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
+        <div class="text-center max-w-xl mx-auto space-y-2">
+          <span class="text-xs text-[#4A5D4E] font-semibold uppercase tracking-widest">Danh Mục Chuyên Sâu</span>
+          <h2 class="font-serif text-3xl md:text-4xl text-[#2A2723] font-normal">Khám Phá Theo Nhu Cầu</h2>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+          <RouterLink 
+            v-for="(cat, idx) in categories" 
+            :key="idx"
+            :to="`/products?q=${encodeURIComponent(cat.tag)}`"
+            class="bg-white border border-[#EBE7DF] rounded-2xl p-5 text-center hover:border-[#4A5D4E] hover:shadow-md transition-all duration-300 group flex flex-col items-center justify-between h-44"
+          >
+            <div class="w-12 h-12 rounded-full bg-[#FAF8F5] border border-[#EBE7DF] flex items-center justify-center text-[#4A5D4E] group-hover:bg-[#4A5D4E] group-hover:text-white transition duration-300">
+              <span class="material-symbols-outlined text-xl">{{ cat.icon }}</span>
+            </div>
+            
+            <div class="space-y-1">
+              <h3 class="font-serif text-sm font-medium text-[#2A2723] group-hover:text-[#4A5D4E] transition-colors">{{ cat.name }}</h3>
+              <p class="text-[10px] text-[#8C8275] font-light leading-tight">{{ cat.desc }}</p>
+            </div>
+          </RouterLink>
+        </div>
+      </section>
+
+      <!-- 4. FLASH SALE (if active) -->
+      <section v-if="flashSaleProducts.length > 0" class="max-w-7xl mx-auto px-4 md:px-8">
         <FlashSaleSection :products="flashSaleProducts" />
       </section>
 
-      <!-- 4. AI Skin Diagnosis Highlight Banner (Biggest Highlight) -->
-      <section>
-        <AIDiagnosisBanner />
-      </section>
-
-      <!-- 5. AI Recommended Products Section -->
-      <section>
-        <RecommendationSection :products="recommendedProducts" />
-      </section>
-
-      <!-- 6. Best Sellers & Skincare Categories -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Main Products Side -->
-        <div class="lg:col-span-12 space-y-12">
-          
-          <!-- Products for Acne -->
-          <div class="space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-black">healing</span> Hỗ Trợ Trị Mụn Da Liễu
-              </h3>
-              <RouterLink to="/products?q=mụn" class="text-xs font-bold text-emerald-600 hover:underline">
-                Xem tất cả
-              </RouterLink>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              <ProductCard v-for="product in acneProducts" :key="product._id" :product="product" />
-              <div v-if="acneProducts.length === 0" class="col-span-full py-8 text-center text-slate-400 text-xs">
-                Chưa có sản phẩm điều trị mụn nào trong cơ sở dữ liệu.
-              </div>
-            </div>
+      <!-- 5. AI RECOMMENDED PRODUCTS SECTION -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#EBE7DF] pb-4 gap-4">
+          <div class="text-left space-y-1">
+            <span class="text-xs text-[#9A5B32] font-semibold uppercase tracking-widest">Cá Nhân Hóa Da Liễu</span>
+            <h2 class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal">Gợi Ý Dành Cho Làn Da Của Bạn</h2>
           </div>
+          <RouterLink to="/products" class="text-xs font-semibold uppercase tracking-widest text-[#4A5D4E] hover:underline">
+            Xem tất cả sản phẩm →
+          </RouterLink>
+        </div>
 
-          <!-- Products for Sensitive Skin -->
-          <div class="space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-black">spa</span> Phục Hồi Làn Da Nhạy Cảm
-              </h3>
-              <RouterLink to="/products?q=nhạy+cảm" class="text-xs font-bold text-emerald-600 hover:underline">
-                Xem tất cả
-              </RouterLink>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              <ProductCard v-for="product in sensitiveProducts" :key="product._id" :product="product" />
-              <div v-if="sensitiveProducts.length === 0" class="col-span-full py-8 text-center text-slate-400 text-xs">
-                Chưa có sản phẩm cho da nhạy cảm nào trong cơ sở dữ liệu.
-              </div>
-            </div>
-          </div>
+        <div v-if="loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+          <div v-for="n in 5" :key="n" class="h-80 bg-[#EBE7DF]/50 rounded-2xl animate-pulse"></div>
+        </div>
 
-          <!-- Products for Dry Skin -->
-          <div class="space-y-6">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 class="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
-                <span class="material-symbols-outlined text-black">water_drop</span> Cấp Ẩm Da Khô & Bong Tróc
-              </h3>
-              <RouterLink to="/products?q=khô" class="text-xs font-bold text-emerald-600 hover:underline">
-                Xem tất cả
-              </RouterLink>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              <ProductCard v-for="product in drySkinProducts" :key="product._id" :product="product" />
-              <div v-if="drySkinProducts.length === 0" class="col-span-full py-8 text-center text-slate-400 text-xs">
-                Chưa có sản phẩm cấp ẩm da khô nào trong cơ sở dữ liệu.
-              </div>
-            </div>
-          </div>
-
+        <div v-else>
+          <RecommendationSection :products="recommendedProducts" />
         </div>
       </section>
 
-      <!-- 7. Health Skin Blogs Section -->
-      <section class="space-y-6">
-        <div class="text-left">
-          <span class="text-emerald-600 font-extrabold text-[10px] tracking-widest uppercase bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-            Cẩm nang y khoa
-          </span>
-          <h2 class="text-2xl md:text-3xl font-black text-slate-800 mt-2">
-            Bài viết nổi bật từ bác sĩ da liễu
-          </h2>
-        </div>
+      <!-- 6. BEST SELLING PRODUCTS GRID BY SKIN CONCERNS -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8 space-y-16">
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <!-- Section A: Acne Treatment -->
+        <div class="space-y-8">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#EBE7DF] pb-4 gap-4">
+            <div class="text-left space-y-1">
+              <span class="text-xs text-[#4A5D4E] font-semibold uppercase tracking-widest">Chuyên Da Mụn & Dầu</span>
+              <h2 class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal">Hỗ Trợ Điều Trị Mụn Da Liễu</h2>
+            </div>
+            <RouterLink to="/products?q=mụn" class="text-xs font-semibold uppercase tracking-widest text-[#4A5D4E] hover:underline">
+              Khám phá thêm →
+            </RouterLink>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <ProductCard v-for="product in acneProducts" :key="product._id" :product="product" />
+            <div v-if="acneProducts.length === 0" class="col-span-full py-12 text-center text-[#8C8275] text-xs font-serif italic">
+              Chưa có sản phẩm trị mụn nào trong cơ sở dữ liệu.
+            </div>
+          </div>
+        </div>
+
+        <!-- Section B: Sensitive Skin -->
+        <div class="space-y-8">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end border-b border-[#EBE7DF] pb-4 gap-4">
+            <div class="text-left space-y-1">
+              <span class="text-xs text-[#4A5D4E] font-semibold uppercase tracking-widest">Phục Hồi Sâu</span>
+              <h2 class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal">Dành Cho Làn Da Nhạy Cảm</h2>
+            </div>
+            <RouterLink to="/products?q=nhạy+cảm" class="text-xs font-semibold uppercase tracking-widest text-[#4A5D4E] hover:underline">
+              Khám phá thêm →
+            </RouterLink>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+            <ProductCard v-for="product in sensitiveProducts" :key="product._id" :product="product" />
+            <div v-if="sensitiveProducts.length === 0" class="col-span-full py-12 text-center text-[#8C8275] text-xs font-serif italic">
+              Chưa có sản phẩm cho da nhạy cảm nào trong cơ sở dữ liệu.
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 7. BRAND STORY SECTION (50/50 Editorial Layout) -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8">
+        <div class="bg-[#F4F1EA] border border-[#EBE7DF] rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 text-left">
+          
+          <div class="p-8 md:p-14 flex flex-col justify-center space-y-6">
+            <span class="text-xs text-[#4A5D4E] font-semibold uppercase tracking-widest">Triết Lý Thương Hiệu</span>
+            <h2 class="font-serif text-3xl md:text-4xl text-[#2A2723] font-normal leading-tight">
+              Sự Kết Hợp Giữa Dược Liệu Tự Nhiên & Y Khoa Hiện Đại
+            </h2>
+            <p class="text-xs md:text-sm text-[#6B6357] font-light leading-relaxed">
+              Mỗi công thức chăm sóc da tại SkinMedi AI đều được kiểm nghiệm lâm sàng bởi các chuyên gia da liễu hàng đầu. Chúng tôi cam kết minh bạch thành phần, không chứa chất gây kích ứng và ứng dụng AI để đồng hành cùng lộ trình phục hồi làn da của bạn.
+            </p>
+            <div>
+              <RouterLink to="/products" class="inline-block px-7 py-3 border border-[#2A2723] text-[#2A2723] hover:bg-[#2A2723] hover:text-white rounded-full text-xs font-semibold uppercase tracking-widest transition duration-300">
+                TÌM HIỂU THÊM
+              </RouterLink>
+            </div>
+          </div>
+
+          <div class="relative min-h-[320px] lg:min-h-full">
+            <img 
+              src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?auto=format&fit=crop&q=80&w=800" 
+              alt="Brand Skincare Ingredients Story" 
+              class="w-full h-full object-cover"
+            />
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 8. KNOWLEDGE BLOG SECTION -->
+      <section class="max-w-7xl mx-auto px-4 md:px-8 space-y-8">
+        <div class="text-left border-b border-[#EBE7DF] pb-4">
+          <span class="text-xs text-[#4A5D4E] font-semibold uppercase tracking-widest">Cẩm Nang Bác Sĩ</span>
+          <h2 class="font-serif text-2xl md:text-3xl text-[#2A2723] font-normal mt-1">Kiến Thức Chăm Sóc Da</h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
           <article 
             v-for="blog in blogArticles" 
             :key="blog.id"
-            class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-md transition duration-300 flex flex-col h-full group"
+            class="bg-white rounded-2xl border border-[#EBE7DF] overflow-hidden hover:shadow-lg transition duration-500 flex flex-col h-full group"
           >
-            <div class="h-48 w-full overflow-hidden bg-slate-100 relative">
-              <img :src="blog.image" :alt="blog.title" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-              <span class="absolute top-3 left-3 bg-emerald-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-md shadow">
+            <div class="h-52 w-full overflow-hidden bg-[#F4F1EA] relative">
+              <img :src="blog.image" :alt="blog.title" class="w-full h-full object-cover group-hover:scale-105 transition duration-700" />
+              <span class="absolute top-3 left-3 bg-[#4A5D4E] text-[#FAF8F5] font-semibold text-[9px] uppercase tracking-wider px-2.5 py-1 rounded-md shadow">
                 {{ blog.category }}
               </span>
             </div>
-            
-            <div class="p-5 flex flex-col flex-grow text-left justify-between">
+
+            <div class="p-6 flex flex-col flex-grow justify-between space-y-4">
               <div>
-                <span class="text-[10px] text-slate-400 font-bold block mb-1">Đăng ngày: {{ blog.date }}</span>
-                <h3 class="font-extrabold text-slate-800 text-sm md:text-base line-clamp-2 group-hover:text-primary transition-colors">
+                <span class="text-[10px] text-[#8C8275] font-medium block mb-1 uppercase tracking-wider">{{ blog.date }}</span>
+                <h3 class="font-serif text-base text-[#2A2723] font-medium line-clamp-2 group-hover:text-[#4A5D4E] transition-colors leading-snug">
                   {{ blog.title }}
                 </h3>
-                <p class="text-xs text-slate-500 mt-2 line-clamp-3 leading-relaxed">
+                <p class="text-xs text-[#6B6357] font-light mt-2 line-clamp-3 leading-relaxed">
                   {{ blog.desc }}
                 </p>
               </div>
-              
-              <div class="pt-4 border-t border-slate-50 mt-4 flex items-center text-xs font-bold text-emerald-600 group-hover:text-emerald-700">
+
+              <div class="pt-3 border-t border-[#FAF8F5] text-xs font-semibold text-[#4A5D4E] flex items-center gap-1">
                 <span>Đọc bài viết</span>
-                <span class="ml-1">→</span>
+                <span>→</span>
               </div>
             </div>
           </article>
@@ -266,7 +417,7 @@ onMounted(() => {
 
     </main>
 
-    <!-- Footer component -->
+    <!-- Footer -->
     <Footer />
   </div>
 </template>

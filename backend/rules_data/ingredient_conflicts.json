@@ -1,0 +1,37 @@
+[
+  {
+    "ingredient_a": "Retinol",
+    "ingredient_b": "Benzoyl Peroxide",
+    "conflict_severity": "SEVERE",
+    "reason": "Benzoyl Peroxide làm oxy hóa và vô hiệu hóa Retinol, đồng thời gây kích ứng bong tróc da nặng nề.",
+    "recommendation": "Không dùng chung trong cùng 1 routine. Nên bôi BPO buổi sáng và Retinol buổi tối, hoặc dùng cách ngày."
+  },
+  {
+    "ingredient_a": "Retinol",
+    "ingredient_b": "Glycolic Acid (AHA)",
+    "conflict_severity": "HIGH",
+    "reason": "Cả hai đều làm tăng tốc độ thay da và bạt sừng. Dùng chung gây bỏng rát, hỏng hàng rào bảo vệ da.",
+    "recommendation": "Dùng cách ngày (Đêm thứ 2-4-6 dùng Retinol, Đêm thứ 3-5-7 dùng AHA)."
+  },
+  {
+    "ingredient_a": "Salicylic Acid (BHA)",
+    "ingredient_b": "Retinol",
+    "conflict_severity": "HIGH",
+    "reason": "Gây khô da quá mức, châm chích đỏ tấy và rạn nứt màng lipid.",
+    "recommendation": "Dùng BHA buổi sáng / buổi tối khác với đêm dùng Retinol."
+  },
+  {
+    "ingredient_a": "Vitamin C (L-AA)",
+    "ingredient_b": "Niacinamide",
+    "conflict_severity": "LOW",
+    "reason": "Ở độ pH axit thấp (<3.5), Niacinamide có thể chuyển hóa thành Niacin gây đỏ bừng mặt tạm thời.",
+    "recommendation": "Chờ 15 phút giữa 2 bước, hoặc dùng Vitamin C buổi sáng và Niacinamide buổi tối."
+  },
+  {
+    "ingredient_a": "Vitamin C (L-AA)",
+    "ingredient_b": "AHA / BHA nồng độ cao",
+    "conflict_severity": "HIGH",
+    "reason": "Cùng tính axit mạnh làm thay đổi pH da, dễ gây bỏng hóa học.",
+    "recommendation": "Dùng Vitamin C buổi sáng và AHA/BHA buổi tối."
+  }
+]

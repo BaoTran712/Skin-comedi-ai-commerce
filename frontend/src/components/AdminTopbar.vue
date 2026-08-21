@@ -8,9 +8,13 @@ const username = computed(() => localStorage.getItem("username"));
 const role = computed(() => localStorage.getItem("role"));
 
 const logout = () => {
+    localStorage.removeItem("authenticateToken");
     localStorage.removeItem("token");
     localStorage.removeItem("username");
     localStorage.removeItem("role");
+    localStorage.removeItem("user");
+    localStorage.removeItem("id");
+    localStorage.removeItem("avatar");
     push.success("Đăng xuất thành công!");
     router.push("/");
     setTimeout(() => {

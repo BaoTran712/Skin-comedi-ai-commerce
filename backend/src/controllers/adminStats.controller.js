@@ -10,7 +10,9 @@ const adminStatsService = new AdminStatsService();
  */
 export async function getDashboardStats(req, res, next) {
   try {
-    const stats = await adminStatsService.getDashboardStats();
+    const period = req.query.period || "month";
+    const date = req.query.date || "";
+    const stats = await adminStatsService.getDashboardStats(period, date);
     res.json(stats);
   } catch (error) {
     next(error);

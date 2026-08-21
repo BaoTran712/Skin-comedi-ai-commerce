@@ -22,14 +22,18 @@ const handleStaffLogin = async () => {
 
     const response = await staffService.login(username.value, password.value);
     if (response?.data?.token) {
+      const staff = response.data.staff;
+      let staffRole = (staff.role || "STAFF").toUpperCase();
+
       localStorage.setItem("authenticateToken", response.data.token);
-      localStorage.setItem("user", JSON.stringify(response.data.staff));
-      localStorage.setItem("username", response.data.staff.username);
-      localStorage.setItem("id", response.data.staff.id);
-      localStorage.setItem("role", "staff");
-      localStorage.setItem("avatar", response.data.staff.avatar || "");
-      push.success("Đăng nhập thành công");
-      router.push("/products");
+      localStorage.setItem("user", JSON.stringify(staff));
+      localStorage.setItem("username", staff.username);
+      localStorage.setItem("id", staff.id);
+      localStorage.setItem("role", staffRole);
+      localStorage.setItem("avatar", staff.avatar || "");
+      push.success("Đăng nhập tài khoản quản trị/nhân viên thành công");
+
+      router.push("/dashboard");
     }
   } catch (error) {
     if (error.inner) {

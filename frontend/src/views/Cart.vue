@@ -38,7 +38,7 @@ const getItemImage = (item) => {
     // Always use snapshot image — variant first, then product image
     if (item.variant?.image) return item.variant.image;
     if (item.product?.image) return item.product.image;
-    return `https://placehold.co/200x200/f0fdf4/16a34a?text=${encodeURIComponent((item.product?.title || 'SP').slice(0, 8))}`;
+    return `/images/product-missing.svg`;
 };
 
 const getItemPrice = (item) => {
@@ -99,7 +99,8 @@ const formatPrice = (price) => {
                                     :src="getItemImage(item)" 
                                     :alt="item.product.title"
                                     class="w-full h-full object-contain"
-                                    @error="(e) => e.target.src = `https://placehold.co/200x200/f0fdf4/16a34a?text=IMG`"
+                                    referrerpolicy="no-referrer"
+                                    @error="(e) => e.target.src = `/images/product-missing.svg`"
                                 />
                             </div>
 

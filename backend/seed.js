@@ -1,6 +1,13 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 import User from "./src/models/user.model.js";
 import Staff from "./src/models/staff.model.js";
@@ -43,6 +50,7 @@ async function seedData() {
         await Staff.deleteMany({});
         await Position.deleteMany({});
         await User.deleteMany({});
+        await Setting.deleteMany({});
 
         const hashedPassword = await bcrypt.hash("123456", 12);
 
@@ -75,7 +83,13 @@ async function seedData() {
             gender: true,
             addresses: [{
                 label: "Nhà riêng",
-                address: "Ninh Kieu, Can Tho",
+                provinceCode: "92",
+                provinceName: "Thành phố Cần Thơ",
+                districtCode: "916",
+                districtName: "Quận Ninh Kiều",
+                wardCode: "31114",
+                wardName: "Phường An Khánh",
+                addressDetail: "123 Đường 3/2",
                 phone: "0909000111",
                 isDefault: true
             }]
@@ -463,6 +477,29 @@ async function seedData() {
 
         const createdProducts = [];
         for (const prodData of productsList) {
+            // Compute slug manually to assign local image URL
+            const slug = prodData.title.toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[đĐ]/g, 'd').replace(/([^0-9a-z-\s])/g, '').replace(/(\s+)/g, '-').replace(/-+/g, '-').replace(/^-+|-+$/g, '');
+            
+            prodData.slug = slug;
+            prodData.name = prodData.title;
+            
+            // Validate local image existence
+            const expectedImagePath = `/images/products/${slug}.jpg`;
+            const absoluteImagePath = path.join(__dirname, `../frontend/public${expectedImagePath}`);
+            
+            if (fs.existsSync(absoluteImagePath)) {
+                prodData.image = expectedImagePath;
+                prodData.images = [expectedImagePath];
+                prodData.imageSource = 'local';
+                prodData.imageVerified = true;
+            } else {
+                console.warn(`[SEED WARNING] Missing image for product: ${prodData.title}`);
+                prodData.image = null;
+                prodData.images = [];
+                prodData.imageSource = 'missing';
+                prodData.imageVerified = false;
+            }
+            
             const product = new Product(prodData);
             await product.save();
             createdProducts.push(product);
@@ -491,7 +528,15 @@ async function seedData() {
             user_id: user1._id,
             staff_id: admin._id,
             promotion_id: promo1._id,
-            shipping_address: user1.addresses[0].address,
+            shipping_address: {
+                provinceCode: user1.addresses[0].provinceCode,
+                provinceName: user1.addresses[0].provinceName,
+                districtCode: user1.addresses[0].districtCode,
+                districtName: user1.addresses[0].districtName,
+                wardCode: user1.addresses[0].wardCode,
+                wardName: user1.addresses[0].wardName,
+                addressDetail: user1.addresses[0].addressDetail,
+            },
             phone_number: user1.addresses[0].phone,
             status: "shipping",
             carrier_name: "Giao Hàng Nhanh",

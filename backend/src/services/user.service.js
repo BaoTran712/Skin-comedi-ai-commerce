@@ -7,13 +7,33 @@ class UserService {
             username: payload.username,
             first_name: payload.first_name || undefined,
             last_name: payload.last_name || undefined,
+            email: payload.email || undefined,
+            phone: payload.phone || undefined,
             password: payload.password,
-            role: payload.role || "user",
+            role: (payload.role || "CUSTOMER").toUpperCase(),
             birthday: payload.birthday || undefined,
             gender: payload.gender,
-            address: payload.address || undefined,
-            phone: payload.phone || undefined,
+            isVerified: payload.isVerified || false,
+            otp: payload.otp || undefined,
+            otp_expiry: payload.otp_expiry || undefined,
         };
+
+        // Insert structured address only if province and district codes are provided
+        if (payload.selectedProvince && payload.selectedDistrict) {
+            userData.addresses = [{
+                label: "Nhà riêng",
+                recipientName: `${payload.first_name || ""} ${payload.last_name || ""}`.trim() || "Người nhận",
+                provinceCode: payload.selectedProvince.toString(),
+                provinceName: payload.address.split(", ")[1] || "Tỉnh/Thành",
+                districtCode: payload.selectedDistrict.toString(),
+                districtName: payload.address.split(", ")[0] || "Quận/Huyện",
+                wardCode: "00000", // Default fallback code to pass model schema requirements
+                wardName: "Chưa chọn Phường/Xã",
+                addressDetail: "Chưa cập nhật số nhà",
+                phone: payload.phone || "0000000000",
+                isDefault: true
+            }];
+        }
 
         Object.keys(userData).forEach(key => {
             if (userData[key] === undefined || userData[key] === null || userData[key] === "") {
@@ -43,8 +63,15 @@ class UserService {
         });
     }
 
-    async findByUsername(username) {
-        return await User.findOne({ username });
+    async findByUsername(identifier) {
+        if (!identifier) return null;
+        return await User.findOne({
+            $or: [
+                { username: identifier },
+                { email: identifier },
+                { phone: identifier }
+            ]
+        });
     }
 
     async update(id, payload) {

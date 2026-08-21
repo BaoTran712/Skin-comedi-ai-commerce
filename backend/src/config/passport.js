@@ -27,7 +27,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
                     first_name: profile.name?.givenName || profile.displayName || 'Google',
                     last_name: profile.name?.familyName || 'User',
                     avatar: profile.photos?.[0]?.value,
-                    role: 'user'
+                    role: 'CUSTOMER'
                 });
                 await user.save();
             }
@@ -58,7 +58,7 @@ if (process.env.FACEBOOK_APP_ID && process.env.FACEBOOK_APP_SECRET) {
                     first_name: profile.name?.givenName || profile.displayName || 'Facebook',
                     last_name: profile.name?.familyName || 'User',
                     avatar: profile.photos?.[0]?.value,
-                    role: 'user'
+                    role: 'CUSTOMER'
                 });
                 await user.save();
             }

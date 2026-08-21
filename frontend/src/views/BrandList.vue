@@ -13,7 +13,7 @@ const publisherService = new BrandService();
 const router = useRouter();
 const brands = ref([]);
 const searchText = ref("");
-const role = computed(() => localStorage.getItem("role"));
+const role = computed(() => (localStorage.getItem("role") || "").toUpperCase());
 
 const fetchBrands = async () => {
     try {
@@ -59,7 +59,7 @@ const handleDeleteAllPublishers = async () => {
 };
 
 onMounted(async () => {
-    if (role.value !== "staff") {
+    if (role.value !== "STAFF" && role.value !== "ADMIN") {
         router.push("/");
     }
     fetchBrands();
@@ -76,7 +76,7 @@ onMounted(async () => {
                     <InputSearch class="w-full" v-model=" searchText "></InputSearch>
                 </div>
 
-                <template v-if=" role === 'staff' ">
+                <template v-if=" role === 'STAFF' || role === 'ADMIN' ">
                     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-2">
                         <button class="btn btn-neutral hover:btn-info hover:text-white hover:scale-[1.01]"
                             @click=" goToAddPublisher ">Thêm Thương hiệu</button>

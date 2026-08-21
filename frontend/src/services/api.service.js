@@ -18,11 +18,16 @@ const ApiClient = (baseUrl) => {
         return config;
     });
 
-    // Tự xử lý khi token hết hạn
+    // Tự xử lý khi token hết hạn hoặc tài khoản bị khóa
     apiClient.interceptors.response.use(response => response, error => {
-        if (error.response?.status === 401 && error.response?.data.message === "Token Expired") {
+        const status = error.response?.status;
+        const msg = error.response?.data?.message || "";
+        
+        if (status === 401 || (status === 403 && (msg.includes("khóa") || msg.includes("ngừng hoạt động")))) {
             localStorage.clear();
-            window.location.href = "/user/login";
+            if (!window.location.pathname.includes("/user/login")) {
+                window.location.href = "/user/login?error=" + encodeURIComponent(msg || "Phiên làm việc hết hạn hoặc tài khoản bị khóa");
+            }
         }
         return Promise.reject(error);
     });

@@ -15,7 +15,7 @@ const productService = new ProductService();
 const brandService = new BrandService();
 const variantService = new VariantService();
 const router = useRouter();
-const role = computed(() => localStorage.getItem("role"));
+const role = computed(() => (localStorage.getItem("role") || "").toUpperCase());
 
 const hasVariants = ref(false);
 const variants = ref([]);
@@ -70,11 +70,10 @@ const addImageUrl = () => {
 const handleFileSelect = (e) => {
   const files = Array.from(e.target.files);
   files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      imagesList.value.push(ev.target.result);
-    };
-    reader.readAsDataURL(file);
+    if (file.type.startsWith("image/")) {
+      const url = URL.createObjectURL(file);
+      imagesList.value.push({ file, url });
+    }
   });
 };
 
@@ -83,11 +82,8 @@ const handleDrop = (e) => {
   const files = Array.from(e.dataTransfer.files);
   files.forEach(file => {
     if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        imagesList.value.push(ev.target.result);
-      };
-      reader.readAsDataURL(file);
+      const url = URL.createObjectURL(file);
+      imagesList.value.push({ file, url });
     }
   });
 };
@@ -142,24 +138,56 @@ const handleCreateProduct = handleSubmit(async (values) => {
       delete payload.flash_sale_price;
       delete payload.flash_sale_end_time;
     }
+
+    payload.price = Number(payload.price) || 0;
+    payload.quantity = Number(payload.quantity) || 0;
+
+    if (hasVariants.value && variants.value.length > 0) {
+      payload.quantity = variants.value.reduce((sum, v) => sum + (Number(v.quantity) || 0), 0);
+    }
     
     payload.has_variants = hasVariants.value;
-    payload.image = imagesList.value[0] || "";
-    payload.images = imagesList.value;
+    payload.image = ""; // Will be updated after upload
+    payload.images = [];
 
-    const newProduct = await productService.createProduct(payload);
+    const resData = await productService.createProduct(payload);
+    const newProduct = resData.document || resData;
+    const targetId = newProduct._id || newProduct.id;
 
     if (hasVariants.value && variants.value.length > 0) {
       const variantPromises = variants.value.map(v => {
         return variantService.createVariant({
-          product_id: newProduct._id || newProduct.id,
-          attributes: [{ name: v.attrName, value: v.attrValue }],
-          price: v.price,
-          quantity: v.quantity,
-          image: v.image
+          product_id: targetId,
+          attributes: [{ name: v.attrName || '', value: v.attrValue || '' }],
+          price: Number(v.price) || 0,
+          quantity: Number(v.quantity) || 0,
+          image: v.image || ''
         });
       });
       await Promise.all(variantPromises);
+    }
+
+    if (imagesList.value.length > 0) {
+      const imgObj = imagesList.value[0];
+      if (imgObj.file) {
+        const formData = new FormData();
+        formData.append("image", imgObj.file);
+        try {
+          push.promise("Đang tải ảnh lên...");
+          await productService.uploadImage(targetId, formData);
+          push.success("Tải ảnh lên thành công");
+        } catch (err) {
+          push.error("Tải ảnh thất bại");
+        }
+      } else if (typeof imgObj === 'string' && imgObj.trim()) {
+        try {
+          if (targetId) {
+            await productService.updateProduct(targetId, { image: imgObj.trim() });
+          }
+        } catch (err) {
+          console.error("Failed to update image URL", err);
+        }
+      }
     }
 
     push.success("Thêm sản phẩm thành công");
@@ -175,7 +203,7 @@ const handleCreateProduct = handleSubmit(async (values) => {
 });
 
 onMounted(async () => {
-  if (role.value !== "staff") {
+  if (role.value !== "STAFF" && role.value !== "ADMIN") {
     router.push("/");
   }
   fetchBrands();
@@ -259,9 +287,9 @@ onMounted(async () => {
               <div 
                 v-for="(imgUrl, idx) in imagesList" 
                 :key="idx" 
-                class="group relative rounded-xl overflow-hidden border border-slate-200 aspect-square bg-slate-100 shadow-sm"
+                class="group relative rounded-xl overflow-hidden border border-gray-200 aspect-square bg-gray-50 shadow-sm"
               >
-                <img :src="imgUrl" class="w-full h-full object-cover" />
+                <img :src="imgUrl.url || imgUrl" class="w-full h-full object-cover" />
                 
                 <span v-if="idx === 0" class="absolute top-1.5 left-1.5 bg-emerald-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-md shadow-sm">
                   ẢNH BÌA

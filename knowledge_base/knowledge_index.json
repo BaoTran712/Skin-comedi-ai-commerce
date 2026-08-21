@@ -1,0 +1,189 @@
+[
+  {
+    "id": "KB_001",
+    "disease_en": "Acne",
+    "disease_vn": "Mụn trứng cá",
+    "symptoms": ["mụn mủ", "mụn sưng viêm", "mụn đầu đen", "mụn đầu trắng", "sần đỏ", "tắc nghẽn lỗ chân lông"],
+    "active_ingredients_recommended": ["Salicylic Acid (BHA)", "Benzoyl Peroxide", "Retinoids", "Niacinamide", "Azelaic Acid"],
+    "product_types_recommended": ["Cleanser", "Toner", "Serum", "Gel", "Spot Treatment"],
+    "severity": "LOW to MEDIUM",
+    "keywords": ["mụn", "mụn bọc", "mụn ẩn", "lỗ chân lông to", "da dầu", "skincare mụn"],
+    "file_path": "01_Acne.md"
+  },
+  {
+    "id": "KB_002",
+    "disease_en": "Eczema",
+    "disease_vn": "Chàm / Viêm da cơ địa",
+    "symptoms": ["ngứa dữ dội", "đỏ da", "da khô bong tróc", "nứt nẻ", "chảy dịch", "dày sừng"],
+    "active_ingredients_recommended": ["Ceramides", "Urea", "Glycerin", "Colloidal Oatmeal", "Hyaluronic Acid"],
+    "product_types_recommended": ["Cream", "Ointment", "Moisturizer", "Gentle Cleanser"],
+    "severity": "MEDIUM",
+    "keywords": ["chàm", "viêm da", "ngứa", "khô nẻ", "cơ địa", "dị ứng"],
+    "file_path": "02_Eczema.md"
+  },
+  {
+    "id": "KB_003",
+    "disease_en": "Atopic Dermatitis",
+    "disease_vn": "Viêm da cơ địa dị ứng",
+    "symptoms": ["phát ban đỏ", "ngứa", "khô ráp", "trầy xước do gãi"],
+    "active_ingredients_recommended": ["Ceramides", "Panthenol (B5)", "Shea Butter"],
+    "product_types_recommended": ["Ointment", "Cream"],
+    "severity": "MEDIUM",
+    "keywords": ["viêm da", "dị ứng", "atopic", "ngứa mạn tính"],
+    "file_path": "03_Atopic_Dermatitis.md"
+  },
+  {
+    "id": "KB_004",
+    "disease_en": "Psoriasis",
+    "disease_vn": "Vảy nến",
+    "symptoms": ["mảng da đỏ", "vảy trắng bạc", "dày sừng", "ngứa", "chảy máu rớm"],
+    "active_ingredients_recommended": ["Salicylic Acid (BHA)", "Coal Tar", "Urea", "Lactic Acid"],
+    "product_types_recommended": ["Ointment", "Cream", "Lotion"],
+    "severity": "MEDIUM to HIGH",
+    "keywords": ["vảy nến", "mảng đỏ", "bong tróc", "tự miễn"],
+    "file_path": "04_Psoriasis.md"
+  },
+  {
+    "id": "KB_005",
+    "disease_en": "Rosacea",
+    "disease_vn": "Chứng đỏ mặt (Trứng cá đỏ)",
+    "symptoms": ["đỏ bừng mặt", "giãn mao mạch", "sần mủ", "mắt cộm ngứa"],
+    "active_ingredients_recommended": ["Azelaic Acid", "Niacinamide", "Metronidazole"],
+    "product_types_recommended": ["Gel", "Cream", "Sunscreen"],
+    "severity": "MEDIUM",
+    "keywords": ["đỏ mặt", "mạch máu", "trứng cá đỏ", "rosacea", "nhạy cảm"],
+    "file_path": "05_Rosacea.md"
+  },
+  {
+    "id": "KB_006",
+    "disease_en": "Seborrheic Dermatitis",
+    "disease_vn": "Viêm da tiết bã",
+    "symptoms": ["gàu", "vảy vàng nhờn", "đỏ da", "ngứa"],
+    "active_ingredients_recommended": ["Ketoconazole", "Zinc Pyrithione", "Salicylic Acid"],
+    "product_types_recommended": ["Shampoo", "Cream", "Gel"],
+    "severity": "LOW to MEDIUM",
+    "keywords": ["viêm da tiết bã", "gàu", "vảy nhờn", "ngứa da đầu"],
+    "file_path": "06_Seborrheic_Dermatitis.md"
+  },
+  {
+    "id": "KB_007",
+    "disease_en": "Seborrheic Keratoses",
+    "disease_vn": "U hạt bã nhờn / Dày sừng tiết bã",
+    "symptoms": ["nốt sần tối màu", "bề mặt sáp", "trông như dán lên da"],
+    "active_ingredients_recommended": ["Alpha Hydroxy Acids (AHA)"],
+    "product_types_recommended": ["Cream", "Lotion"],
+    "severity": "LOW",
+    "keywords": ["u hạt bã nhờn", "nốt sần đen", "lão hóa da"],
+    "file_path": "07_Seborrheic_Keratoses.md"
+  },
+  {
+    "id": "KB_008",
+    "disease_en": "Benign Keratosis-like Lesions",
+    "disease_vn": "Tổn thương dạng u hạt sừng lành tính",
+    "symptoms": ["đốm nâu đỏ", "sần sùi nhẹ", "tăng sắc tố"],
+    "active_ingredients_recommended": ["Retinoids", "Vitamin C", "AHA"],
+    "product_types_recommended": ["Serum", "Cream", "Sunscreen"],
+    "severity": "LOW",
+    "keywords": ["u hạt sừng", "đốm nâu", "lành tính"],
+    "file_path": "08_Benign_Keratosis_like_Lesions.md"
+  },
+  {
+    "id": "KB_009",
+    "disease_en": "Melanocytic Nevi",
+    "disease_vn": "U nhú Melanin / Nốt ruồi",
+    "symptoms": ["đốm tròn đều màu", "bờ nhẵn", "không ngứa đau"],
+    "active_ingredients_recommended": ["N/A"],
+    "product_types_recommended": ["Sunscreen"],
+    "severity": "LOW",
+    "keywords": ["nốt ruồi", "u nhú", "melanin", "đốm đen"],
+    "file_path": "09_Melanocytic_Nevi.md"
+  },
+  {
+    "id": "KB_010",
+    "disease_en": "Basal Cell Carcinoma",
+    "disease_vn": "U tế bào đáy (Ung thư da BCC)",
+    "symptoms": ["vết loét không lành", "nốt sần có mạch máu đỏ", "vảy rớm máu"],
+    "active_ingredients_recommended": ["N/A"],
+    "product_types_recommended": ["Sunscreen"],
+    "severity": "HIGH",
+    "keywords": ["ung thư da", "bcc", "loét da", "chảy máu", "u tế bào đáy"],
+    "file_path": "10_Basal_Cell_Carcinoma.md"
+  },
+  {
+    "id": "KB_011",
+    "disease_en": "Melanoma",
+    "disease_vn": "U hắc tố ác tính",
+    "symptoms": ["nốt ruồi thay đổi màu", "bờ không đều", "kích thước lớn nhanh", "chảy máu"],
+    "active_ingredients_recommended": ["N/A"],
+    "product_types_recommended": ["Sunscreen"],
+    "severity": "EMERGENCY",
+    "keywords": ["ung thư da", "ác tính", "melanoma", "nốt ruồi lạ"],
+    "file_path": "11_Melanoma.md"
+  },
+  {
+    "id": "KB_012",
+    "disease_en": "Tinea Ringworm",
+    "disease_vn": "Nấm da (Hắc lào)",
+    "symptoms": ["vết đỏ hình đồng tiền", "viền nổi gờ", "rất ngứa", "bong vảy"],
+    "active_ingredients_recommended": ["Clotrimazole", "Ketoconazole", "Miconazole"],
+    "product_types_recommended": ["Cream", "Ointment"],
+    "severity": "MEDIUM",
+    "keywords": ["nấm da", "hắc lào", "lác đồng tiền", "vòng đỏ ngứa"],
+    "file_path": "12_Tinea_Ringworm.md"
+  },
+  {
+    "id": "KB_013",
+    "disease_en": "Warts",
+    "disease_vn": "Mụn cóc",
+    "symptoms": ["nốt sần cứng", "bề mặt thô ráp", "có chấm đen nhỏ li ti"],
+    "active_ingredients_recommended": ["Salicylic Acid (high concentration)"],
+    "product_types_recommended": ["Liquid", "Gel", "Plaster"],
+    "severity": "LOW",
+    "keywords": ["mụn cóc", "mụn hạt cơm", "HPV", "sần sùi"],
+    "file_path": "13_Warts.md"
+  },
+  {
+    "id": "KB_014",
+    "disease_en": "Molluscum Contagiosum",
+    "disease_vn": "U mềm lây",
+    "symptoms": ["nốt sần ngọc trai", "lõm giữa", "không đau"],
+    "active_ingredients_recommended": ["Salicylic Acid"],
+    "product_types_recommended": ["Cream"],
+    "severity": "LOW to MEDIUM",
+    "keywords": ["u mềm lây", "mụn ngọc trai", "lây nhiễm"],
+    "file_path": "14_Molluscum_Contagiosum.md"
+  },
+  {
+    "id": "KB_015",
+    "disease_en": "Vitiligo",
+    "disease_vn": "Bạch biến",
+    "symptoms": ["mảng da mất màu trắng bệch", "tóc bạch kim ở vùng bệnh"],
+    "active_ingredients_recommended": ["Tacrolimus", "Corticosteroids"],
+    "product_types_recommended": ["Ointment", "Sunscreen"],
+    "severity": "MEDIUM",
+    "keywords": ["bạch biến", "mất sắc tố", "da trắng bệch"],
+    "file_path": "15_Vitiligo.md"
+  },
+  {
+    "id": "KB_016",
+    "disease_en": "Actinic Keratosis",
+    "disease_vn": "Dày sừng quang hóa",
+    "symptoms": ["mảng da khô ráp như giấy nhám", "đỏ hoặc nâu", "nhạy cảm"],
+    "active_ingredients_recommended": ["Fluorouracil (5-FU)", "Imiquimod", "Diclofenac"],
+    "product_types_recommended": ["Cream", "Gel", "Sunscreen"],
+    "severity": "MEDIUM to HIGH",
+    "keywords": ["tiền ung thư", "dày sừng", "quang hóa", "nhám da"],
+    "file_path": "16_Actinic_Keratosis.md"
+  },
+  {
+    "id": "KB_017",
+    "disease_en": "Chickenpox",
+    "disease_vn": "Thủy đậu",
+    "symptoms": ["sốt nhẹ", "nổi mụn nước toàn thân", "ngứa", "vỡ ra và đóng vảy"],
+    "active_ingredients_recommended": ["Calamine", "Acyclovir"],
+    "product_types_recommended": ["Lotion", "Ointment"],
+    "severity": "MEDIUM",
+    "keywords": ["thủy đậu", "trái rạ", "mụn nước", "virus"],
+    "file_path": "17_Chickenpox.md"
+  }
+]

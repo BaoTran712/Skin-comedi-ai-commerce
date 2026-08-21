@@ -20,6 +20,22 @@ const userSchema = mongoose.Schema({
     password: {
         type: String,
     },
+    phone: {
+        type: String,
+        unique: true,
+        sparse: true,
+        trim: true,
+    },
+    isVerified: {
+        type: Boolean,
+        default: false,
+    },
+    otp: {
+        type: String,
+    },
+    otp_expiry: {
+        type: Date,
+    },
     birthday: {
         type: Date,
     },
@@ -28,13 +44,21 @@ const userSchema = mongoose.Schema({
     },
     addresses: [{
         label: { type: String, trim: true }, // optional nickname
-        address: { type: String, required: true, trim: true },
+        recipientName: { type: String, trim: true },
+        provinceCode: { type: String, required: true },
+        provinceName: { type: String, required: true },
+        districtCode: { type: String, required: true },
+        districtName: { type: String, required: true },
+        wardCode: { type: String, required: true },
+        wardName: { type: String, required: true },
+        addressDetail: { type: String, required: true, trim: true },
         phone: { type: String, required: true, match: /^0[0-9]{9}$/ },
         isDefault: { type: Boolean, default: false }
     }],
     role: {
         type: String,
-        default: "user",
+        enum: ["ADMIN", "STAFF", "CUSTOMER"],
+        default: "CUSTOMER",
     },
     oauth_provider: {
         type: String,
@@ -59,7 +83,24 @@ const userSchema = mongoose.Schema({
         type: String,
         enum: ["bronze", "silver", "gold", "diamond"],
         default: "bronze",
-    }
+    },
+    status: {
+        type: String,
+        enum: ["ACTIVE", "INACTIVE", "LOCKED"],
+        default: "ACTIVE",
+    },
+    skin_profile: {
+        skin_type: { type: String, default: "" },
+        conditions: { type: [String], default: [] },
+        current_products: { type: [String], default: [] },
+        notes: { type: String, default: "" }
+    },
+    bank_accounts: [{
+        bank_name: { type: String, required: true, trim: true },
+        account_name: { type: String, required: true, trim: true },
+        account_number: { type: String, required: true, trim: true },
+        isDefault: { type: Boolean, default: false }
+    }]
 },
     {
         timestamps: true,

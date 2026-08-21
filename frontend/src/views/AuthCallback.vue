@@ -23,11 +23,15 @@ onMounted(() => {
     try {
       const parsedUser = JSON.parse(decodeURIComponent(user));
       
+      let userRole = (parsedUser.role || "CUSTOMER").toUpperCase();
+      if (userRole === "USER") userRole = "CUSTOMER";
+      if (userRole === "EMPLOYEE") userRole = "STAFF";
+
       localStorage.setItem("authenticateToken", token);
       localStorage.setItem("user", JSON.stringify(parsedUser));
       localStorage.setItem("username", parsedUser.username);
       localStorage.setItem("id", parsedUser.id);
-      localStorage.setItem("role", parsedUser.role || "user");
+      localStorage.setItem("role", userRole);
       localStorage.setItem("avatar", parsedUser.avatar || "");
       
       push.success("Đăng nhập thành công!");

@@ -36,7 +36,7 @@ const removeVariantRow = (index) => {
 };
 
 const product_id = route.params.id;
-const role = computed(() => localStorage.getItem("role"));
+const role = computed(() => (localStorage.getItem("role") || "").toUpperCase());
 
 const imagesList = ref([]);
 const newImageUrl = ref("");
@@ -49,29 +49,41 @@ const addImageUrl = () => {
   }
 };
 
-const handleFileSelect = (e) => {
+const handleFileSelect = async (e) => {
   const files = Array.from(e.target.files);
-  files.forEach(file => {
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      imagesList.value.push(ev.target.result);
-    };
-    reader.readAsDataURL(file);
-  });
+  for (const file of files) {
+    if (file.type.startsWith("image/")) {
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        push.promise("Đang tải ảnh lên...");
+        const res = await bookService.uploadImage(product_id, formData);
+        imagesList.value.unshift(res.imageUrl);
+        push.success("Tải ảnh lên thành công");
+      } catch (err) {
+        push.error("Tải ảnh thất bại");
+      }
+    }
+  }
 };
 
-const handleDrop = (e) => {
+const handleDrop = async (e) => {
   isDragging.value = false;
   const files = Array.from(e.dataTransfer.files);
-  files.forEach(file => {
+  for (const file of files) {
     if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        imagesList.value.push(ev.target.result);
-      };
-      reader.readAsDataURL(file);
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        push.promise("Đang tải ảnh lên...");
+        const res = await bookService.uploadImage(product_id, formData);
+        imagesList.value.unshift(res.imageUrl);
+        push.success("Tải ảnh lên thành công");
+      } catch (err) {
+        push.error("Tải ảnh thất bại");
+      }
     }
-  });
+  }
 };
 
 const removeImage = (index) => {
@@ -114,12 +126,12 @@ const fetchProduct = async () => {
         const book_data = await bookService.getProduct(product_id);
         resetForm({
             values: {
-                title: book_data.title,
-                usage: book_data.usage,
-                price: book_data.price,
-                expiry_date: book_data.expiry_date,
-                brand_id: book_data.brand_id?._id,
-                quantity: book_data.quantity,
+                title: book_data.title || "",
+                usage: book_data.usage || "",
+                price: book_data.price !== undefined ? book_data.price : 0,
+                expiry_date: book_data.expiry_date || "",
+                brand_id: book_data.brand_id?._id || book_data.brand_id || "",
+                quantity: book_data.quantity !== undefined ? book_data.quantity : 0,
                 flash_sale_price: book_data.flash_sale_price || undefined,
                 flash_sale_end_time: book_data.flash_sale_end_time ? new Date(book_data.flash_sale_end_time).toISOString().slice(0, 16) : undefined
             }
@@ -132,26 +144,27 @@ const fetchProduct = async () => {
 
         if (hasVariants.value) {
             const data = await variantService.getVariantsByProductId(product_id);
-            variants.value = data.map(v => ({
+            variants.value = (data || []).map(v => ({
                 _id: v._id || v.id,
                 attrName: v.attributes?.[0]?.name || '',
                 attrValue: v.attributes?.[0]?.value || '',
-                price: v.price,
-                quantity: v.quantity,
-                image: v.image
+                price: v.price !== undefined ? v.price : 0,
+                quantity: v.quantity !== undefined ? v.quantity : 0,
+                image: v.image || ''
             }));
         }
     } catch (error) {
-        console.log(error);
+        console.error("fetchProduct Error:", error);
+        push.error("Lỗi khi tải thông tin sản phẩm");
     }
 };
 
 const fetchBrands = async () => {
     try {
         const publishers_data = await publisherService.getAllBrands();
-        brands.value = publishers_data;
+        brands.value = publishers_data || [];
     } catch (error) {
-        console.log(error);
+        console.error("fetchBrands Error:", error);
     }
 };
 
@@ -159,10 +172,19 @@ const fetchBrands = async () => {
 const handleUpdateProduct = handleSubmit(async (values) => {
     try {
         const payload = { ...values };
+        payload.price = Number(payload.price) || 0;
+        payload.quantity = Number(payload.quantity) || 0;
+
         if (!isFlashSale.value) {
             payload.flash_sale_price = null;
             payload.flash_sale_end_time = null;
         }
+
+        // If product has variants, update variants and sync total quantity
+        if (hasVariants.value && variants.value.length > 0) {
+            payload.quantity = variants.value.reduce((sum, v) => sum + (Number(v.quantity) || 0), 0);
+        }
+
         payload.has_variants = hasVariants.value;
         payload.image = imagesList.value[0] || "";
         payload.images = imagesList.value;
@@ -178,10 +200,10 @@ const handleUpdateProduct = handleSubmit(async (values) => {
             for (const v of variants.value) {
                 const variantData = {
                     product_id,
-                    attributes: [{ name: v.attrName, value: v.attrValue }],
-                    price: v.price,
-                    quantity: v.quantity,
-                    image: v.image
+                    attributes: [{ name: v.attrName || '', value: v.attrValue || '' }],
+                    price: Number(v.price) || 0,
+                    quantity: Number(v.quantity) || 0,
+                    image: v.image || ''
                 };
                 if (v._id || v.id) {
                     await variantService.updateVariant(v._id || v.id, variantData);
@@ -194,9 +216,13 @@ const handleUpdateProduct = handleSubmit(async (values) => {
         push.success("Cập nhật sản phẩm thành công");
         router.push("/products");
     } catch (error) {
-        console.log(error);
-        push.error("Đã xảy ra lỗi khi cập nhật sản phẩm");
+        console.error("handleUpdateProduct Error:", error);
+        push.error(error.response?.data?.message || "Đã xảy ra lỗi khi cập nhật sản phẩm");
     }
+}, (errors) => {
+    console.warn("Validation errors:", errors);
+    const firstErr = Object.values(errors)[0];
+    push.error(firstErr?.message || "Vui lòng kiểm tra lại các trường thông tin!");
 });
 
 const handleDeleteProduct = async (product_id) => {
@@ -213,7 +239,7 @@ const handleDeleteProduct = async (product_id) => {
 };
 
 onMounted(async () => {
-    if (role.value !== "staff") {
+    if (role.value !== "STAFF" && role.value !== "ADMIN") {
         router.push("/");
     }
     fetchProduct();
@@ -225,7 +251,7 @@ onMounted(async () => {
     <div class="flex flex-col min-h-screen">
         <Header></Header>
         <div class="flex flex-grow justify-center items-center">
-            <form @submit.prevent>
+            <form @submit.prevent="handleUpdateProduct">
                 <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4 text-base">
                     <legend class="fieldset-legend text-xl">Cập nhật sản phẩm</legend>
                     <label class="label" for="title">Tên sản phẩm</label>
@@ -367,11 +393,11 @@ onMounted(async () => {
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
-                        <button @click="handleUpdateProduct( product_id )"
+                        <button type="submit"
                             class="btn btn-neutral mt-4 hover:scale-[1.01] text-base">Cập
                             nhật</button>
-                        <button class="btn btn-neutral mt-4 hover:scale-[1.01] text-base"
-                            @click=" handleDeleteProduct( product_id )">Xóa</button>
+                        <button type="button" class="btn btn-neutral mt-4 hover:scale-[1.01] text-base"
+                            @click="handleDeleteProduct(product_id)">Xóa</button>
                     </div>
 
                     <span class="mt-4">

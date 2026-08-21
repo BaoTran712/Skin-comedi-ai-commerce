@@ -1,0 +1,83 @@
+[
+  {
+    "disease_id": "KB_001",
+    "disease_name": "Acne",
+    "preferred_ingredients": ["Salicylic Acid", "Niacinamide", "Benzoyl Peroxide", "Zinc PCA", "Azelaic Acid"],
+    "hidden_ingredients": ["Heavy Coconut Oil", "Lanolin", "Isopropyl Myristate", "SLS"],
+    "preferred_product_types": ["Gel Cleanser", "Treatment Serum", "Oil-Free Moisturizer", "Fluid Sunscreen"],
+    "hidden_product_types": ["Heavy Occlusive Cream", "Facial Oil", "Physical Walnut Scrub"],
+    "min_safety_score": 70
+  },
+  {
+    "disease_id": "KB_002",
+    "disease_name": "Eczema",
+    "preferred_ingredients": ["Ceramides", "Colloidal Oatmeal", "Panthenol B5", "Petrolatum", "Squalane"],
+    "hidden_ingredients": ["Retinol", "Glycolic Acid", "Salicylic Acid", "Fragrance", "Alcohol Denat", "Peeling Acids"],
+    "preferred_product_types": ["Soap-free Cream Cleanser", "Heavy Repair Cream", "Healing Balm", "Mineral Sunscreen"],
+    "hidden_product_types": ["Physical Scrub", "Alcohol Toner", "Foaming Cleanser", "Chemical Peel"],
+    "min_safety_score": 85
+  },
+  {
+    "disease_id": "KB_003",
+    "disease_name": "Atopic Dermatitis",
+    "preferred_ingredients": ["Ceramides 3:1:1", "Panthenol B5", "Colloidal Oatmeal", "Petrolatum"],
+    "hidden_ingredients": ["Fragrance", "Essential Oils", "SLS", "Alcohol Denat", "Glycolic Acid", "Salicylic Acid"],
+    "preferred_product_types": ["Syndet Bar", "Cleansing Oil", "Heavy Repair Cream", "Mineral Sunscreen"],
+    "hidden_product_types": ["Bubble Bath", "Scrub", "Perfumed Body Lotion"],
+    "min_safety_score": 85
+  },
+  {
+    "disease_id": "KB_004",
+    "disease_name": "Psoriasis",
+    "preferred_ingredients": ["Urea", "Ceramides", "Salicylic Acid", "Coal Tar", "Lactic Acid"],
+    "hidden_ingredients": ["Cồn khô", "Tẩy da chết hạt Scrub", "Xà phòng kiềm cao"],
+    "preferred_product_types": ["Coal Tar Shampoo", "Urea 10% Cream", "Salicylic Ointment", "Heavy Ointment"],
+    "hidden_product_types": ["Physical Scrub", "Alcohol Toner", "Waxing Strip"],
+    "min_safety_score": 75
+  },
+  {
+    "disease_id": "KB_005",
+    "disease_name": "Rosacea",
+    "preferred_ingredients": ["Azelaic Acid", "Ceramides", "Panthenol B5", "Centella Asiatica", "Zinc Oxide"],
+    "hidden_ingredients": ["Retinol", "Alcohol Denat", "Fragrance", "Glycolic Acid", "Salicylic Acid high dose", "Menthol", "Camphor"],
+    "preferred_product_types": ["Soothing Gel Cleanser", "Azelaic Acid Gel", "Light Fluid Moisturizer", "Green Mineral Sunscreen"],
+    "hidden_product_types": ["Face Scrub", "Chemical Peel", "Heavy Ointment", "Alcohol Astringent"],
+    "min_safety_score": 90
+  },
+  {
+    "disease_id": "KB_006",
+    "disease_name": "Seborrheic Dermatitis",
+    "preferred_ingredients": ["Ketoconazole", "Zinc Pyrithione", "Selenium Sulfide", "Salicylic Acid", "MCT Oil"],
+    "hidden_ingredients": ["Olive Oil", "Coconut Oil", "Shea Butter", "Polysorbates"],
+    "preferred_product_types": ["Ketoconazole Shampoo", "Zinc Pyrithione Cleanser", "Oil-Free Water Gel"],
+    "hidden_product_types": ["Hair Oil", "Heavy Night Mask", "Oily Pomade"],
+    "min_safety_score": 70
+  },
+  {
+    "disease_id": "KB_010",
+    "disease_name": "Basal Cell Carcinoma",
+    "preferred_ingredients": [],
+    "hidden_ingredients": ["*"],
+    "preferred_product_types": [],
+    "hidden_product_types": ["*"],
+    "min_safety_score": 100
+  },
+  {
+    "disease_id": "KB_011",
+    "disease_name": "Melanoma",
+    "preferred_ingredients": [],
+    "hidden_ingredients": ["*"],
+    "preferred_product_types": [],
+    "hidden_product_types": ["*"],
+    "min_safety_score": 100
+  },
+  {
+    "disease_id": "KB_012",
+    "disease_name": "Tinea Ringworm",
+    "preferred_ingredients": ["Gentle Cleanser", "Antifungal Support"],
+    "hidden_ingredients": ["Corticoid", "Betamethasone", "Dexamethasone", "Dầu dừa"],
+    "preferred_product_types": ["Gentle Cleanser", "Antifungal Powder"],
+    "hidden_product_types": ["7-Color Steroid Creams", "Heavy Body Oil"],
+    "min_safety_score": 80
+  }
+]

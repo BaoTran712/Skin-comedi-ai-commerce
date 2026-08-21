@@ -11,15 +11,16 @@
   --shadow:
     rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-  --sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --heading: 'Outfit', system-ui, -apple-system, sans-serif;
+  --sans: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --serif: 'Playfair Display', Georgia, serif;
+  --heading: 'Playfair Display', Georgia, serif;
   --mono: 'JetBrains Mono', ui-monospace, monospace;
 
   font: 16px/1.6 var(--sans);
   letter-spacing: -0.011em;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
+  color-scheme: light;
+  color: #2A2723;
+  background: #FAF8F5;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -62,29 +63,9 @@ h5,
 h6 {
   font-family: var(--heading);
   font-weight: 700;
-  color: var(--text-h);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
 p {
   margin: 0;
 }
@@ -299,4 +280,28 @@ code {
     right: 0;
     border-right-color: var(--border);
   }
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+.font-sans {
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+}
+
+.bg-cream {
+  background-color: #FAF8F5 !important;
+}
+
+.bg-olive {
+  background-color: #4A5D4E !important;
+}
+
+.text-olive {
+  color: #4A5D4E !important;
+}
+
+.border-olive {
+  border-color: #4A5D4E !important;
 }
